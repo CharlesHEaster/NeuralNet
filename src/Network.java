@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
 public class Network implements Comparable<Network>{
-	////TODO:
+
 	ArrayList<ArrayList<Node>> nodes;
 	Integer score;
 	ArrayList<Integer> heredity;
@@ -9,6 +9,7 @@ public class Network implements Comparable<Network>{
 	ArrayList<ArrayList<Integer>> outputs;
 	ArrayList<Double> networkOutput;
 	String[] netInputLegend;
+	private static int FirstGen; // Static in Network assumes only one group of networks at a time, which is true
 
 	//utilities
 	private void createNodes(int[] structure) {
@@ -48,8 +49,34 @@ public class Network implements Comparable<Network>{
 		}
 		return networkOutput;
 	}
+	
+	public String toString() {
+		String str = "Network Structure[";
+		for (int i = 0; i < this.nodes.size(); i++) {
+			str += this.nodes.get(i).size();
+			if (i == this.nodes.size() - 1) {
+				str += "]";
+			} else {
+			str += ", ";
+			}
+		}
+		str += "  Heredity [";
+		for (int i = 0; i < this.heredity.size(); i++) {
+			str += this.heredity.get(i);
+			if (i == this.heredity.size() - 1) {
+				str += "]";
+			} else {
+			str += ", ";
+			}
+		}
+			
+		
+		return str;
+		
+		
+	}
 
-	public ArrayList<Integer> getOutput() {
+	public ArrayList<Double> getOutput() {
 		return this.networkOutput;
 	}
 
@@ -65,7 +92,7 @@ public class Network implements Comparable<Network>{
 		ArrayList<ArrayList<Node>> newNodes = new ArrayList<ArrayList<Node>>();
 		for (int i = 0; i < this.nodes.size(); i++){
 			ArrayList<Node> temp = new ArrayList<Node>();
-			for ( int j = 0; j < this.nodes.get(i).size(); j++){
+			for (int j = 0; j < this.nodes.get(i).size(); j++){
 				temp.add(this.nodes.get(i).get(j).morph());
 			}
 			newNodes.add(temp);
@@ -73,16 +100,18 @@ public class Network implements Comparable<Network>{
 
 		ArrayList<Integer> newHered = new ArrayList<Integer>();
 		newHered.addAll(this.heredity); 
-		newHered.add(this.children);//check it adds to end of arraylist
+		newHered.add(this.children);
 		this.children++;
 		return new Network(newNodes, newHered);
 	}
 
 	//constructors
-	public Network(int[] structure, int hered) {  //new network, random nodes
+	public Network(int[] structure) {  //new network, random nodes, first gen
 	   createNodes(structure);
 	   this.score = 0;
-	   this.heredity.add(hered);
+	   this.heredity = new ArrayList<Integer>();
+	   this.heredity.add(Network.FirstGen);
+	   Network.FirstGen++;
 	   }
 
 	public Network(ArrayList<ArrayList<Node>> nodes, ArrayList<Integer> hered) {

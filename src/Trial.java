@@ -9,16 +9,13 @@ public class Trial {
 	int cycles;
 	int[] structure;
 	double[][] inputs;
-	static int FirstGenNetworks;
 	ArrayList<Network> theBest;
 
 	//constructors
 	public Trial(int numNetworks, int numCycles, int[] netStructure, double [][] inputs){
 		//setup
-		FirstGenNetworks = 0;
 		for (int i = 0; i < numNetworks; i++) {
-			networks.add(new Network(netStructure, FirstGenNetworks));
-			FirstGenNetworks++;
+			networks.add(new Network(netStructure));
 		}
 	}
 
