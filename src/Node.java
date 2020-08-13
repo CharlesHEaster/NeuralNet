@@ -107,11 +107,37 @@ public class Node {
 			if (newWeights[i] > 0) {
 				newStep += newWeights[i];  //find highest possible weighted total
 			}
-
-			newStep = newStep / 2; // divide the highest possible weighted total by 2,  call it the step
 		}
-
-		return new Node(newWeights, newStep);
+		if (newStep == 0) { // if all weights are negative, step is half the lowest possible
+		    for (int i = 0; i < this.weights.length; i++) {
+		        newStep += this.weights[i];
+		    }
+		}
+        newStep = newStep / 2; // divide the highest (or lowest) possible weighted total by 2,  call it the step
+        if (newStep == 0) { //if all weights are 0
+            return this.morph();
+        } else {
+            return new Node(newWeights, newStep);
+        }
+	}
+	
+	public static double[] makeWeights(int numWeights){
+	    double[] weights = new double[numWeights];
+	    boolean zeros$ = true;
+	    for (int i = 0; i < numWeights; i++) {
+		    if ((Math.random() > 0.5){ // half of weights will have value
+			weights[i] = (Math.random() * 2) - 1;
+		    } else {
+		        weights[i] = 0;
+		    }
+		    if (weights[i] == 0) { //if this weight is not 0
+		        zeros$ = false;    // flip zeros$ to false
+		    }
+		}
+		if (zeros$){ // if all the weights are 0, try again
+		    return Node.makeWeights(numWeights)
+		}
+		return weights;
 	}
 
 	// Constructors
@@ -122,15 +148,19 @@ public class Node {
 	}
 
 	public Node(int numWeights) { // from scratch, random weights, random step
-		this.weights = new double[numWeights];
+		this.weights = Node.makeWeights(numWeights);
 		double newStep = 0;
-		for (int i = 0; i < numWeights; i++) {
-			this.weights[i] = (Math.random() * 2) - 1;
-			if (this.weights[i] > 0) {
-				newStep += this.weights[i];  //find highest possible weighted total
-			}
+		for (int i = 0; i < this.weights.length; i++) { //find highest possible positive value
+		    if (this.weights[i] > 0){
+		        newStep += this.weights[i];
+		    }
 		}
-		this.step = newStep / 2;
+		if (newStep == 0){// if all weights negative or zero, find lowest possible value
+		    for (int i = 0; i < this.weights.length; i++) {
+		        newStep += this.weights[i];
+		    }
+		}
+		this.step = newStep / 2; //devide max (or min) by two, call it the step(threshold value)
 	}
 
 	public Node(Node node) {
