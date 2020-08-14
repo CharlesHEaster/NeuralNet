@@ -5,8 +5,7 @@ public class Node {
 
 	ArrayList<Integer> inputs;
 	private double[] weights;
-	int output;
-	double step;
+	double output;
 
 	// getters and setters
 	public void setInputs(ArrayList<Integer> inpu) {
@@ -37,12 +36,8 @@ public class Node {
 		return this.weights[i];
 	}
 
-	public int getOutput() {
+	public double getOutput() {
 		return this.output;
-	}
-	
-	public double getStep() {
-		return this.step;
 	}
 
 	// utilities
@@ -73,16 +68,14 @@ public class Node {
 		return str;
 	}
 	
-	public int calcOutput() {
+	public double calcOutput() {
+	    //Activation function changed from bespoke "Frankenstein Equation" to tanh.  See note at end of code
 		double rawOutput = 0;
 		for (int i = 0; i < this.inputs.size(); i++) {
 			rawOutput += inputs.get(i) * weights[i];
 		}
-		if (rawOutput >= this.step) {
-			this.output = 1;
-		} else {
-			this.output = 0;
-		}
+		this.output = Math.tanh(rawOutput);
+		
 		return this.output;
 	}
 	
@@ -121,7 +114,8 @@ public class Node {
         }
 	}
 	
-	public static double[] makeWeights(int numWeights){
+	public static double[] makeWeights(int numWeights){ // change to better make number of 
+	//0 weights proportionate to number of weights.  or just do it better
 	    double[] weights = new double[numWeights];
 	    boolean zeros$ = true;
 	    for (int i = 0; i < numWeights; i++) {
@@ -142,29 +136,34 @@ public class Node {
 
 	// Constructors
 
-	public Node(double[] weigh, double st) {
+	public Node(double[] weigh) {
 		this.weights = weigh;
-		this.step = st;
 	}
 
 	public Node(int numWeights) { // from scratch, random weights, random step
 		this.weights = Node.makeWeights(numWeights);
-		double newStep = 0;
-		for (int i = 0; i < this.weights.length; i++) { //find highest possible positive value
-		    if (this.weights[i] > 0){
-		        newStep += this.weights[i];
-		    }
-		}
-		if (newStep == 0){// if all weights negative or zero, find lowest possible value
-		    for (int i = 0; i < this.weights.length; i++) {
-		        newStep += this.weights[i];
-		    }
-		}
-		this.step = newStep / 2; //devide max (or min) by two, call it the step(threshold value)
 	}
 
 	public Node(Node node) {
 		this.setWeights(node.getWeights());
-		this.step = node.step;
 	}
 }
+
+
+/**Activation Function:  So I was using a weird pieced together activation function based on 
+ * what I thought would be best, call it the Frankenstein Funciton.  I'm not a genius and
+ * I am just learning, so I changed to one of the standard models, tanh().  If in a few
+ * years I am a neural net genius and I decide to revisit this code, maybe some of the half
+ * cooked uninformed ideas hold.  Till then, here is an explination of the 
+ * Frankenstein Function and what I was thinking.**/
+ 
+ /**Frankenstein Function:  Adapted step function.  If there are any positive weights,
+  * step(threshold) = half of total positive weights.  if not, step = half of negative weights.
+  * 
+  * I was anticipating mostly positive inputs that had potential to be quite 
+  * large.  So this would make the step value not be "so low" as to only be positive 
+  * or an arbitrary value like 1, nor be exactly in the middle of the range.  It would
+  * allow the step to be towards the higher end of the total possible range.  But 
+  * I fear I am trying to muddle with too many variables at once (Neg vs Pos weights 
+  * and step value).  So I think it is best to go with a standard activation model for now
+  * and just learn how it propogates.  The End **/
