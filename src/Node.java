@@ -41,32 +41,45 @@ public class Node {
 	}
 
 	// utilities
-	public String toString() {
+	public String toString() {  //= old code.  I learned about for each, oh boy!  test it
 		String str = "Weights [";
-		for (int i = 0; i < this.weights.length; i++) {
-			str += this.weights[i];
-			if (i == this.weights.length - 1) {
-				str += "]";
-			} else {
-			str += ", ";
-			}
-		}
-		if (this.inputs != null) {
-			str += "\nInputs [";
-			for (int i = 0; i < this.inputs.size(); i++) {
-				str += this.inputs.get(i);
-				if (i == this.inputs.size() - 1) {
-					str += "]";
-				} else {
-				str += ", ";
-				}
-			}
-		}
-		str += "\nOutput = " + this.output;
-			
+// 		for (int i = 0; i < this.weights.length; i++) {
+// 			str += this.weights[i];
+// 			if (i == this.weights.length - 1) {
+// 				str += "]";
+// 			} else {
+// 			str += ", ";
+// 			}
+// 		}
+
+        for each( weight, this.weights){
+            str += weight + ", ";
+        }
+	str = str.substring(0, str.length - 2) + "]";
 		
-		return str;
+	if (this.inputs != null) {
+		str += "\nInputs [";
+// 		for (int i = 0; i < this.inputs.size(); i++) {
+// 			str += this.inputs.get(i);
+// 			if (i == this.inputs.size() - 1) {
+// 				str += "]";
+// 			} else {
+// 			str += ", ";
+// 			}
+// 		}
+			
+			
+		for each( input, this.inputs){
+			str += input + ", ";
+		}
+		str = str.substring(0, str.length() - 2) + "]";
+			
 	}
+	str += "\nOutput = " + this.output;
+	
+	return str;
+	}
+
 	
 	public double calcOutput() {
 	    //Activation function changed from bespoke "Frankenstein Equation" to tanh.  See note at end of code
@@ -78,58 +91,43 @@ public class Node {
 		
 		return this.output;
 	}
-	
-	public double calcOutputDouble() {
-		//this should never happen
-		System.out.println("ERROR 692: Regular Node asked to output double");
-		return 0.0692;
-	}
 
 	public Node morph() {
 		double[] newWeights = new double[this.weights.length];
-		double newStep = 0;
 		for (int i = 0; i < this.weights.length; i++) {
-			if (Math.random() > .7) {
-				double rando = (Math.random() - 0.5) * 0.4;
+			if (Math.random() > .7) { //3 in 10 nodes will be randomly adjusted
+				double rando = (Math.random() - 0.5) * 0.4; //they will be randomly adjusted by range(-0.2 -> +0.2)
 				newWeights[i] = this.weights[i] + rando;
-				newWeights[i] = newWeights[i] > 1 ? 1 : newWeights[i];
-				newWeights[i] = newWeights[i] < -1 ? -1 : newWeights[i];
+				newWeights[i] = newWeights[i] > 1 ? 1 : newWeights[i]; //check new weight is not more than 1
+				newWeights[i] = newWeights[i] < -1 ? -1 : newWeights[i];  //check new weight is not less than -1
 			} else {
-				newWeights[i] = this.weights[i];
-			}
-			if (newWeights[i] > 0) {
-				newStep += newWeights[i];  //find highest possible weighted total
+				newWeights[i] = this.weights[i]; // 7 in 10 nodes will be left as is
 			}
 		}
-		if (newStep == 0) { // if all weights are negative, step is half the lowest possible
-		    for (int i = 0; i < this.weights.length; i++) {
-		        newStep += this.weights[i];
-		    }
-		}
-        newStep = newStep / 2; // divide the highest (or lowest) possible weighted total by 2,  call it the step
-        if (newStep == 0) { //if all weights are 0
-            return this.morph();
-        } else {
-            return new Node(newWeights, newStep);
-        }
+		return new Node(newWeights);
 	}
 	
-	public static double[] makeWeights(int numWeights){ // change to better make number of 
-	//0 weights proportionate to number of weights.  or just do it better
+	public static double[] makeWeightsFromScratch(int numWeights){ 
 	    double[] weights = new double[numWeights];
-	    boolean zeros$ = true;
-	    for (int i = 0; i < numWeights; i++) {
-		    if ((Math.random() > 0.5){ // half of weights will have value
-			weights[i] = (Math.random() * 2) - 1;
-		    } else {
-		        weights[i] = 0;
-		    }
-		    if (weights[i] == 0) { //if this weight is not 0
-		        zeros$ = false;    // flip zeros$ to false
-		    }
+	    boolean allZeros$ = true;
+		if (numWeights < 6){//if 1 third of weights is not greater than 2, thus if numWeights < 6
+			for (int i = 0; i < numWeights; i++) {
+				weights[i] = (Math.random() * 2) - 1; //each weight is a random value between -1 and 1
+			}
+		} else { //else numWeights > 6, each node will average at least 2 weights
+	    		for (int i = 0; i < numWeights; i++) {
+		    		if ((Math.random() > 0.3){ // 1 in three weights will have value
+					weights[i] = (Math.random() * 2) - 1;
+		    		} else {
+		        		weights[i] = 0;
+		    		}
+		    		if (weights[i] == 0) { //if this weight is not 0
+		        		allZeros$ = false;    // flip allZeros$ to false
+		    		}
+			}
 		}
-		if (zeros$){ // if all the weights are 0, try again
-		    return Node.makeWeights(numWeights)
+		if (allZeros$){ // if all the weights are 0, try again
+		    weights = Node.makeWeightsFromScratch(numWeights);
 		}
 		return weights;
 	}
