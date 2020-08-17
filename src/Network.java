@@ -6,7 +6,7 @@ public class Network implements Comparable<Network>{
 	Integer score;
 	ArrayList<Integer> heredity;
 	int children;
-	ArrayList<ArrayList<Integer>> outputs;
+	ArrayList<ArrayList<Double>> outputs;
 	ArrayList<Double> networkOutput;
 	String[] netInputLegend;
 	private static int FirstGen; // Static in Network assumes only one group of networks at a time, which is true
@@ -19,8 +19,6 @@ public class Network implements Comparable<Network>{
 			for (int j = 0; j < structure[i]; j++) {
 				if (i == 0) {
 					temp.add(new InputNode());
-				} else if (i == structure.length - 1) {
-					temp.add(new OutputNode(structure[i - 1]));
 				} else {
 					temp.add(new Node(structure[i - 1]));
 				}
@@ -32,14 +30,11 @@ public class Network implements Comparable<Network>{
 	public ArrayList<Double> run(double[] inputs) {
 		this.outputs.clear();
 		for (int i = 0; i < nodes.size(); i++) {
-			ArrayList<Integer> nextOutput = new ArrayList<Integer>();
+			ArrayList<Double> nextOutput = new ArrayList<Double>();
 			for (int j = 0; j < nodes.get(i).size(); j++) {
 				if (i == 0) {
 					nodes.get(i).get(j).setInputs(inputs[i]);
 					nextOutput.add(nodes.get(i).get(j).calcOutput());
-				} else if (i == nodes.size() - 1){
-					this.networkOutput.clear();
-					this.networkOutput.add(nodes.get(i).get(j).calcOutputDouble());
 				} else {
 				nodes.get(i).get(j).setInputs(this.outputs.get(i - 1));
 				nextOutput.add(nodes.get(i).get(j).calcOutput());
@@ -88,6 +83,9 @@ public class Network implements Comparable<Network>{
 		return this.score;
 	}
 
+	public Node getNode(int col, int colnum) {
+		return this.nodes.get(col).get(colnum);
+	}
 	public Network morph(){
 		ArrayList<ArrayList<Node>> newNodes = new ArrayList<ArrayList<Node>>();
 		for (int i = 0; i < this.nodes.size(); i++){
@@ -136,11 +134,9 @@ public class Network implements Comparable<Network>{
 ////	}
 //
 	@Override
+	public int compareTo(Network o) {
 
-	    public int compareTo(Network o) {
-
-	        return this.getScore().compareTo(o.getScore());
-
-	    } 
+		return this.getScore().compareTo(o.getScore());
+	} 
 
 }

@@ -3,24 +3,24 @@ import java.util.ArrayList;
 public class Node {
 
 
-	ArrayList<Integer> inputs;
+	ArrayList<Double> inputs;
 	private double[] weights;
 	double output;
 
 	// getters and setters
-	public void setInputs(ArrayList<Integer> inpu) {
+	public void setInputs(ArrayList<Double> inpu) {
 		if (inpu.size() != this.weights.length) {
 			System.out.println("ERROR 212: Node given incorrect number of inputs");
 		}
 		this.inputs = inpu;
 	}
-	
+
 	public void setInputs(double inpu) {
 		//this should never happen
 		System.out.println("ERROR 459: Regular Node given double as input.");
 	}
 
-	public ArrayList<Integer> getInputs() {
+	public ArrayList<Double> getInputs() {
 		return this.inputs;
 	}
 
@@ -41,54 +41,52 @@ public class Node {
 	}
 
 	// utilities
-	public String toString() {  //= old code.  I learned about for each, oh boy!  test it
+	@Override
+	public String toString() { 
 		String str = "Weights [";
-// 		for (int i = 0; i < this.weights.length; i++) {
-// 			str += this.weights[i];
-// 			if (i == this.weights.length - 1) {
-// 				str += "]";
-// 			} else {
-// 			str += ", ";
-// 			}
-// 		}
-
-        for each( weight, this.weights){
-            str += weight + ", ";
-        }
-	str = str.substring(0, str.length - 2) + "]";
-		
-	if (this.inputs != null) {
-		str += "\nInputs [";
-// 		for (int i = 0; i < this.inputs.size(); i++) {
-// 			str += this.inputs.get(i);
-// 			if (i == this.inputs.size() - 1) {
-// 				str += "]";
-// 			} else {
-// 			str += ", ";
-// 			}
-// 		}
-			
-			
-		for each( input, this.inputs){
-			str += input + ", ";
+		for (double weight: this.weights){
+			str += String.format("%.2f, ", weight);
 		}
 		str = str.substring(0, str.length() - 2) + "]";
-			
-	}
-	str += "\nOutput = " + this.output;
-	
-	return str;
+
+		if (this.inputs != null) {
+			str += "\nInputs [";
+			for( double input: this.inputs){
+				str += input + ", ";
+			}
+			str = str.substring(0, str.length() - 2) + "]";
+		}
+		str += "\nOutput = " + this.output;
+
+		return str;
 	}
 
-	
+	public String toStringDetail() { 
+		String str = "Weights [";
+		for ( double weight: this.weights){
+			str += weight + ", ";
+		}
+		str = str.substring(0, str.length() - 2) + "]";
+
+		if (this.inputs != null) {
+			str += "\nInputs [";
+			for( double input: this.inputs){
+				str += input + ", ";
+			}
+			str = str.substring(0, str.length() - 2) + "]";
+		}
+		str += "\nOutput = " + this.output;
+
+		return str;
+	}
 	public double calcOutput() {
-	    //Activation function changed from bespoke "Frankenstein Equation" to tanh.  See note at end of code
+		//Activation function changed from bespoke "Frankenstein Equation" to tanh().  See note at end of code
 		double rawOutput = 0;
 		for (int i = 0; i < this.inputs.size(); i++) {
 			rawOutput += inputs.get(i) * weights[i];
 		}
 		this.output = Math.tanh(rawOutput);
-		
+
 		return this.output;
 	}
 
@@ -106,28 +104,29 @@ public class Node {
 		}
 		return new Node(newWeights);
 	}
-	
+
 	public static double[] makeWeightsFromScratch(int numWeights){ 
-	    double[] weights = new double[numWeights];
-	    boolean allZeros$ = true;
+		double[] weights = new double[numWeights];
+		boolean allZeros$ = true;
 		if (numWeights < 6){//if 1 third of weights is not greater than 2, thus if numWeights < 6
 			for (int i = 0; i < numWeights; i++) {
 				weights[i] = (Math.random() * 2) - 1; //each weight is a random value between -1 and 1
+				allZeros$ = false;
 			}
 		} else { //else numWeights > 6, each node will average at least 2 weights
-	    		for (int i = 0; i < numWeights; i++) {
-		    		if ((Math.random() > 0.3){ // 1 in three weights will have value
+			for (int i = 0; i < numWeights; i++) {
+				if (Math.random() > 0.3){ // 1 in three weights will have value
 					weights[i] = (Math.random() * 2) - 1;
-		    		} else {
-		        		weights[i] = 0;
-		    		}
-		    		if (weights[i] == 0) { //if this weight is not 0
-		        		allZeros$ = false;    // flip allZeros$ to false
-		    		}
+				} else {
+					weights[i] = 0;
+				}
+				if (weights[i] == 0) { //if this weight is not 0
+					allZeros$ = false;    // flip allZeros$ to false
+				}
 			}
 		}
 		if (allZeros$){ // if all the weights are 0, try again
-		    weights = Node.makeWeightsFromScratch(numWeights);
+			weights = Node.makeWeightsFromScratch(numWeights);
 		}
 		return weights;
 	}
@@ -138,8 +137,8 @@ public class Node {
 		this.weights = weigh;
 	}
 
-	public Node(int numWeights) { // from scratch, random weights, random step
-		this.weights = Node.makeWeights(numWeights);
+	public Node(int numWeights) { // from scratch, random weights
+		this.weights = Node.makeWeightsFromScratch(numWeights);
 	}
 
 	public Node(Node node) {
@@ -148,20 +147,20 @@ public class Node {
 }
 
 
-/**Activation Function:  So I was using a weird pieced together activation function based on 
- * what I thought would be best, call it the Frankenstein Funciton.  I'm not a genius and
+/**Activation Function:  So I was using a strange pieced together activation function based on 
+ * what I thought would be best, call it the Frankenstein Function.  I'm not a genius and
  * I am just learning, so I changed to one of the standard models, tanh().  If in a few
- * years I am a neural net genius and I decide to revisit this code, maybe some of the half
- * cooked uninformed ideas hold.  Till then, here is an explination of the 
- * Frankenstein Function and what I was thinking.**/
- 
- /**Frankenstein Function:  Adapted step function.  If there are any positive weights,
-  * step(threshold) = half of total positive weights.  if not, step = half of negative weights.
-  * 
-  * I was anticipating mostly positive inputs that had potential to be quite 
-  * large.  So this would make the step value not be "so low" as to only be positive 
-  * or an arbitrary value like 1, nor be exactly in the middle of the range.  It would
-  * allow the step to be towards the higher end of the total possible range.  But 
-  * I fear I am trying to muddle with too many variables at once (Neg vs Pos weights 
-  * and step value).  So I think it is best to go with a standard activation model for now
-  * and just learn how it propogates.  The End **/
+ * years I am a neural net prodigy and I decide to revisit this code, maybe some of the half
+ * cooked uninformed ideas hold.  Till then, here is an explanation of the 
+ * Frankenstein Function and what the hell I was thinking.**/
+
+/**Frankenstein Function:  Adapted step function.  If there are any positive weights,
+ * step(threshold) = half of total positive weights.  if not, step = half of negative weights.
+ * 
+ * I was anticipating mostly positive inputs that had potential to be quite 
+ * large.  So this would make the step value not be "so low" as to only be positive 
+ * or an arbitrary value like 1, nor be exactly in the middle of the range.  It would
+ * allow the step to be towards the higher end of the total possible range.  But 
+ * I fear I am trying to muddle with too many variables at once (Neg vs Pos weights 
+ * and step value).  So I think it is best to go with a standard activation model for now
+ * and just learn how it propagates.  The End **/

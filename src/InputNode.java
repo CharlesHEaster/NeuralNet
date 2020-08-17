@@ -1,8 +1,8 @@
 
 public class InputNode extends Node{
-	double min;
-	double max;
-	double doubleInput;
+	private double min;
+	private double max;
+	private double input;
 	
 
 	public InputNode() {
@@ -16,23 +16,18 @@ public class InputNode extends Node{
 		this.max = maxx;
 	}
 	
-	public void setInput(double input) {
-		doubleInput = input;
+	public void setInput(double input) { //takes in input.  checks if it is outside of min or max, and changes min or max as necessary
+		this.input = input;
 		this.min = input < this.min ? input : this.min;
 		this.max = input > this.max ? input : this.max;
 	}
 
 
 	@Override
-	public int calcOutput() {
-		double adjustedInput = this.doubleInput - this.min;
-		double range = this.max - this.min;
-		adjustedInput = adjustedInput / range;
-		if (adjustedInput >= 0.5) {
-			this.output = 1;	
-		} else {
-			this.output = 0;
-		}
+	public double calcOutput() { // maps input from min -> max to -1 > 1
+		this.output = (this.input - this.min) / (this.max - this.min);
+		this.output = (this.output * 2) - 1;		
+		
 		return this.output;
 	}
 	
