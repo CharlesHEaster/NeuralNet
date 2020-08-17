@@ -45,6 +45,10 @@ public class Network implements Comparable<Network>{
 		return networkOutput;
 	}
 	
+	public void resetOutputs() {
+		this.outputs = new ArrayList<ArrayList<Double>>();
+	}
+	
 	public String toString() {
 		String str = "Network Structure[";
 		for (int i = 0; i < this.nodes.size(); i++) {
