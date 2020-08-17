@@ -65,10 +65,23 @@ public class Network implements Comparable<Network>{
 			}
 		}
 			
-		
-		return str;
-		
-		
+		return str;	
+	}
+	
+	public String toStringDetail() {
+		String message = "\n";
+		for (int i = 0; i < nodes.size(); i++) {
+			message += "[";
+			for (int j = 0; j < nodes.get(i).size(); j++) {
+				message += this.nodes.get(i).get(j).toStringBasic();
+				if (j != nodes.get(i).size() - 1) {
+					message += " ";
+				}
+			}
+			message += "]\n";
+		}
+
+		return this.toString() + message; 
 	}
 
 	public ArrayList<Double> getOutput() {

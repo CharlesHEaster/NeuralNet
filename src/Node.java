@@ -43,19 +43,8 @@ public class Node {
 	// utilities
 	@Override
 	public String toString() { 
-		String str = "Weights [";
-		for (double weight: this.weights){
-			str += String.format("%.2f, ", weight);
-		}
-		str = str.substring(0, str.length() - 2) + "]";
-
-		if (this.inputs != null) {
-			str += "\nInputs [";
-			for( double input: this.inputs){
-				str += input + ", ";
-			}
-			str = str.substring(0, str.length() - 2) + "]";
-		}
+		String str = "Weights ";
+		str += this.toStringBasic();
 		str += "\nOutput = " + this.output;
 
 		return str;
@@ -79,6 +68,24 @@ public class Node {
 
 		return str;
 	}
+	
+	public String toStringBasic() { 
+		String str = "[";
+		for (double weight: this.weights){
+			str += String.format("%.2f, ", weight);
+		}
+		str = str.substring(0, str.length() - 2) + "]";
+
+		if (this.inputs != null) {
+			str += "\nInputs [";
+			for( double input: this.inputs){
+				str += input + ", ";
+			}
+			str = str.substring(0, str.length() - 2) + "]";
+		}
+		return str;
+	}
+	
 	public double calcOutput() {
 		//Activation function changed from bespoke "Frankenstein Equation" to tanh().  See note at end of code
 		double rawOutput = 0;
