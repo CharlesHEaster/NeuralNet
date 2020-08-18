@@ -15,11 +15,6 @@ public class Node {
 		this.inputs = inpu;
 	}
 
-	public void setInputs(double inpu) {
-		//this should never happen
-		System.out.println("ERROR 459: Regular Node given double as input.");
-	}
-
 	public ArrayList<Double> getInputs() {
 		return this.inputs;
 	}
@@ -72,7 +67,7 @@ public class Node {
 	public String toStringBasic() { 
 		String str = "[";
 		for (double weight: this.weights){
-			str += String.format("%.2f, ", weight);
+			str += String.format("%.3f, ", weight);
 		}
 		str = str.substring(0, str.length() - 2) + "]";
 

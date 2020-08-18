@@ -2,13 +2,15 @@ import java.util.ArrayList;
 
 public class Network implements Comparable<Network>{
 
-	ArrayList<ArrayList<Node>> nodes;
-	Integer score;
-	ArrayList<Integer> heredity;
-	int children;
-	ArrayList<ArrayList<Double>> outputs;
-	ArrayList<Double> networkOutput;
-	String[] netInputLegend;
+	private ArrayList<ArrayList<Node>> nodes;
+	private Integer score;
+	private ArrayList<Integer> heredity;
+	private int children;
+	private ArrayList<ArrayList<Double>> outputs;
+	private ArrayList<Double> networkOutput;
+	// Network State variables for some future iteration
+//	private double[] stateVar; 
+//	private String[] stateString;
 	private static int FirstGen; // Static in Network assumes only one group of networks at a time, which is true
 
 	//utilities
@@ -30,27 +32,28 @@ public class Network implements Comparable<Network>{
 	public ArrayList<Double> run(double[] inputs) {
 	//1. Iterate through levels (columns) of nodes.
 	//2. Iterate through individual nodes (step down each column)
-	//3. if first column of nodes (hense input nodes), input only the corresponding input from "inputs"
+	//3. if first column of nodes (hence input nodes), input only the corresponding input from "inputs"
 	//  3b. else input all of the previous outputs as inputs
 	//4. calculate output
 	//5. add it to the ArrayList for the next group of outputs
-	//6. add that arraylist to double arraylist of all node outputs for the network
+	//6. add that ArrayList to double ArrayList of all node outputs for the network
 	//7. repeat until all nodes are used.  Last column of outputs is network output.
 		this.outputs.clear();
 		for (int i = 0; i < nodes.size(); i++) {
 			ArrayList<Double> nextOutput = new ArrayList<Double>();
 			for (int j = 0; j < nodes.get(i).size(); j++) {
-				if (i == 0) {
-					nodes.get(i).get(j).setInputs(inputs[j]);
-					nextOutput.add(nodes.get(i).get(j).calcOutput());
+				if (nodes.get(i).get(j) instanceof InputNode ) {
+					((InputNode) nodes.get(i).get(j)).setInput(inputs[j]);
+					nextOutput.add(nodes.get(i).get(j).calcOutput());					
 				} else {
-				nodes.get(i).get(j).setInputs(this.outputs.get(i - 1));
-				nextOutput.add(nodes.get(i).get(j).calcOutput());
+					nodes.get(i).get(j).setInputs(this.outputs.get(i - 1));
+					nextOutput.add(nodes.get(i).get(j).calcOutput());
 				}
 			}
 			this.outputs.add(nextOutput);
 		}
-		return networkOutput;
+		this.networkOutput = this.outputs.get(this.outputs.size() - 1);
+		return this.networkOutput;
 	}
 	
 	public void resetOutputs() {
@@ -64,7 +67,7 @@ public class Network implements Comparable<Network>{
 			if (i == this.nodes.size() - 1) {
 				str += "]";
 			} else {
-			str += ", ";
+				str += ", ";
 			}
 		}
 		str += "  Heredity [";
@@ -73,10 +76,21 @@ public class Network implements Comparable<Network>{
 			if (i == this.heredity.size() - 1) {
 				str += "]";
 			} else {
-			str += ", ";
+				str += ", ";
 			}
 		}
-			
+		if (!this.networkOutput.isEmpty()) {
+			str += "  Outputs [";
+			for (int i = 0; i < this.networkOutput.size(); i++) {
+				str += String.format("%.3f, ", this.networkOutput.get(i));
+				if (i == this.networkOutput.size() - 1) {
+					str += "]";
+				} else {
+					str += ", ";
+				}
+			}
+		}
+
 		return str;	
 	}
 	
@@ -111,6 +125,50 @@ public class Network implements Comparable<Network>{
 	public Node getNode(int col, int colnum) {
 		return this.nodes.get(col).get(colnum);
 	}
+	
+	public ArrayList<Double> getNetworkOutput() {
+		return this.networkOutput;
+	}
+
+	//Network State variables for some future iteration
+//	public double getStateVar(int i) {
+//		return this.stateVar[i];
+//	}
+//
+//	public void setStateVar(int i, double var){
+//		this.stateVar[i] = var;
+//	}
+//
+//	public double[ ] getStateVar() {
+//		return this.stateVar;
+//	}
+//
+//	public void setStateVar(double[ ] var){
+//		this.stateVar = var;
+//	}
+//
+//	public void resetStateVar(){
+//		for(int i =0; i < this.stateVar.length; i++){
+//			this.stateVar[i] = 0;
+//		}
+//	}
+//
+//	public String getStateString(int i) {
+//		return this.stateString[i];
+//	}
+//
+//	public void setStateString(int i, String str){
+//		this.stateString[i] = str;
+//	}
+//
+//	public String[ ] getStateString() {
+//		return this.stateString;
+//	}
+//
+//	public void setStateString(String[ ] str){
+//		this.stateString = str;
+//	} 
+
 	public Network morph(){
 		ArrayList<ArrayList<Node>> newNodes = new ArrayList<ArrayList<Node>>();
 		for (int i = 0; i < this.nodes.size(); i++){
@@ -130,16 +188,28 @@ public class Network implements Comparable<Network>{
 
 	//constructors
 	public Network(int[] structure) {  //new network, random nodes, first gen
-	   createNodes(structure);
-	   this.score = 0;
-	   this.heredity = new ArrayList<Integer>();
-	   this.heredity.add(Network.FirstGen);
-	   Network.FirstGen++;
-	   }
+		createNodes(structure);
+		this.score = 0;
+		this.heredity = new ArrayList<Integer>();
+		this.heredity.add(Network.FirstGen);
+		Network.FirstGen++;
+		int children = 0;
+		this.outputs = new ArrayList<ArrayList<Double>>();
+		ArrayList<Double> out1 = new ArrayList<Double>();
+		outputs.add(out1);
+		this.networkOutput = new ArrayList<Double>();
+	}
 
 	public Network(ArrayList<ArrayList<Node>> nodes, ArrayList<Integer> hered) {
-	   this.nodes = nodes;
-	   this.heredity = hered;
+		this.nodes = nodes;
+		this.heredity = hered;
+		this.nodes = new ArrayList<ArrayList<Node>>();
+		this.score = 0;
+		int children;
+		this.outputs = new ArrayList<ArrayList<Double>>();
+		ArrayList<Double> out1 = new ArrayList<Double>();
+		outputs.add(out1);
+		this.networkOutput = new ArrayList<Double>();
 	   }
 
 //         ----Non Implemented or Tested Phone Code----

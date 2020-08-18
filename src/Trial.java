@@ -5,21 +5,37 @@ public class Trial {
 
 
 	ArrayList<Network> networks, theBest, theMorgue;
-	int cycles;
-	int[] structure;
-	double[][] inputs;
-	boolean fillTheMorgue$;
-	
+	private int cycles;
+	private int[] structure;
+	private RandColor[] inputs;
+	private boolean fillTheMorgue$;
+	private String[] InputLegend;
+
 	public void setMorgue(boolean fill$) {
 		this.fillTheMorgue$ = fill$;
 	}
+	
+	public ArrayList<Network> getNetworks(){
+		return this.networks;
+	}
 
 	//constructors
-	public Trial(int numNetworks, int numCycles, int[] netStructure, double[][] inputs){
+	public Trial(int numNetworks, int numCycles, int[] netStructure, RandColor[] trialInputs){
 		//setup
+		this.networks = new ArrayList<Network>();
 		for (int i = 0; i < numNetworks; i++) {
-			networks.add(new Network(netStructure));
+			this.networks.add(new Network(netStructure));
 		}
+		this.theBest = new ArrayList<Network>();
+		this.cycles = numCycles;
+		this.structure = netStructure;
+		this.inputs = trialInputs;
+		this.fillTheMorgue$ = false;
+		this.InputLegend = new String[3];
+		this.InputLegend[0] = "Red";
+		this.InputLegend[1] = "Green";
+		this.InputLegend[2] = "Blue";
+
 	}
 
 	//Set = A set of inputs
@@ -27,11 +43,16 @@ public class Trial {
 	//Trial = all cycles
 
 
-	public void runSet(double[] inputs){
+	public void runSet(RandColor color){  //this began to become tailored to the color trial.  it's all getting muddled.  get to color trial action, then fix
 		// run a set of inputs
 		for (int i = 0; i < this.networks.size(); i++){
 			this.networks.get(i).resetOutputs();
-			this.networks.get(i).run(inputs);
+			double[] in = new double[3];
+			in[0] = color.getValue(0);
+			in[1] = color.getValue(1);
+			in[2] = color.getValue(2);			
+			this.networks.get(i).run(in);
+			this.evaluate(networks.get(i), networks.get(i).getNetworkOutput(), color);
 		}
 	}										
 
@@ -40,9 +61,9 @@ public class Trial {
 		for (int setNum = 0; setNum < inputs.length; setNum++) {
 			this.runSet(inputs[setNum]);			
 		}
-		//something to score each network
+
 		this.compare();
-//		this.cullAndCreate();
+		//		this.cullAndCreate();
 
 	}
 
@@ -51,38 +72,41 @@ public class Trial {
 		Collections.sort(this.networks, Collections.reverseOrder()); // reverse order because high score first
 	}
 
+	//Make abstract later, and make classes that extend trial.  MyTrial, ColorTrial...
+	//This method takes in a network and it's outputs.  then evaluates those outputs against the answer and updates the network
+	public void evaluate(Network net, ArrayList<Double> outputs, RandColor color) {
+		//This one is specific to ColorTrial
+		//Determine NetworkOutput
+		String NetworkOut = "";
+		if (outputs.get(0) > outputs.get(1) && outputs.get(0) > outputs.get(2)) {
+			NetworkOut = "Red";
+		}
+		if (outputs.get(1) > outputs.get(0) && outputs.get(1) > outputs.get(2)) {
+			NetworkOut = "Green";
+		}
+		if (outputs.get(2) > outputs.get(0) && outputs.get(2) > outputs.get(1)) {
+			NetworkOut = "Blue";
+		}
 
-//	public void cullAndCreate(){
-//		this.theBest.clear();
-//		this.theBest.addAll(this.networks.subList(0, (int) (this.networks.size() * .1))); //grab the best 10%
-//		if (fillTheMorgue$){
-//			this.theMorgue.addAll(this.networks.subList((int) (this.networks.size() * .1), this.networks.size()));
-//		}
-//		this.networks.clear();
-//		for (int i = 0, i < this.theBest.size(), i++){
-//			if(i < this.theBest.size() * .2){
-//				// double children for the top 20% of the top 10%
-//				for (int j = 0, j < 10, j++){
-//					this.networks.add(
-//							this.theBest[i].morph());
-//				}
-//			} else {
-//				for (int j = 0, j < 5, j++){
-//					this.networks.add(
-//							this.theBest[i].morph());
-//				}
-//			}
-//			while(this.networks.size() < numNetworks){
-//				this.networks.add(new Network(this.structure));
-//
-//			}
-//		}
-//	}
-	//
-	//	public void run(){
-	//	   for (int i = 0, i < this.cycles, i++) {
-	//	      this.runCycle()
-	//
-	//	} 
+		//Determine color
+		String answer = "";
+		if (color.values[0] > color.values[1] && color.values[0] > color.values[2]) {
+			answer = "Red";
+		}
+		if (color.values[1] > color.values[0] && color.values[1] > color.values[2]) {
+			answer = "Green";
+		}
+		if (color.values[2] > color.values[1] && color.values[2] > color.values[0]) {
+			answer = "Blue";
+		}
 
+		if (NetworkOut.equals(answer)) {
+			net.incScore();
+		}
+	}
 }
+
+
+
+
+
