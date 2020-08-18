@@ -26,14 +26,21 @@ public class Network implements Comparable<Network>{
 			this.nodes.add(temp);
 		}
 	}
-
+	//1. Iterate through levels (columns) of nodes.
+	//2. Iterate through individual nodes (step down each column)
+	//3. if first column of nodes (hense input nodes), input only the corresponding input from "inputs"
+	//  3b. else input all of the previous outputs as inputs
+	//4. calculate output
+	//5. add it to the ArrayList for the next group of outputs
+	//6. add that arraylist to double arraylist of all node outputs for the network
+	//7. repeat until all nodes are used.  Last column of outputs is network output.
 	public ArrayList<Double> run(double[] inputs) {
 		this.outputs.clear();
 		for (int i = 0; i < nodes.size(); i++) {
 			ArrayList<Double> nextOutput = new ArrayList<Double>();
 			for (int j = 0; j < nodes.get(i).size(); j++) {
 				if (i == 0) {
-					nodes.get(i).get(j).setInputs(inputs[i]);
+					nodes.get(i).get(j).setInputs(inputs[j]);
 					nextOutput.add(nodes.get(i).get(j).calcOutput());
 				} else {
 				nodes.get(i).get(j).setInputs(this.outputs.get(i - 1));
