@@ -29,7 +29,7 @@ public class Network implements Comparable<Network>{
 		}
 	}
 	
-	public ArrayList<Double> run(double[] inputs) {
+	public ArrayList<Double> run(Double[] inputs) {
 	//1. Iterate through levels (columns) of nodes.
 	//2. Iterate through individual nodes (step down each column)
 	//3. if first column of nodes (hence input nodes), input only the corresponding input from "inputs"

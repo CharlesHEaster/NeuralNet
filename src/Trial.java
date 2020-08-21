@@ -1,13 +1,13 @@
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Trial {
+public abstract class Trial {
 
 
 	ArrayList<Network> networks, theBest, theMorgue;
-	private int cycles;
+	private int cycles, numNetworks;
 	private int[] structure;
-	private RandColor[] inputs;
+	private Double[][] TrialInputs;
 	private boolean fillTheMorgue$;
 	private String[] InputLegend;
 
@@ -20,16 +20,17 @@ public class Trial {
 	}
 
 	//constructors
-	public Trial(int numNetworks, int numCycles, int[] netStructure, RandColor[] trialInputs){
+	public Trial(int numNetworks, int numCycles, int[] netStructure, Double[][] trialInputs){
 		//setup
 		this.networks = new ArrayList<Network>();
+		this.numNetworks = numNetworks;
 		for (int i = 0; i < numNetworks; i++) {
 			this.networks.add(new Network(netStructure));
 		}
 		this.theBest = new ArrayList<Network>();
 		this.cycles = numCycles;
 		this.structure = netStructure;
-		this.inputs = trialInputs;
+		this.TrialInputs = trialInputs;
 		this.fillTheMorgue$ = false;
 		this.InputLegend = new String[3];
 		this.InputLegend[0] = "Red";
@@ -43,28 +44,30 @@ public class Trial {
 	//Trial = all cycles
 
 
-	public void runSet(RandColor color){  //this began to become tailored to the color trial.  it's all getting muddled.  get to color trial action, then fix
+	public void runSet(Double[] inputs){
 		// run a set of inputs
 		for (int i = 0; i < this.networks.size(); i++){
-			this.networks.get(i).resetOutputs();
-			double[] in = new double[3];
-			in[0] = color.getValue(0);
-			in[1] = color.getValue(1);
-			in[2] = color.getValue(2);			
-			this.networks.get(i).run(in);
-			this.evaluate(networks.get(i), networks.get(i).getNetworkOutput(), color);
+			this.networks.get(i).resetOutputs();			
+			this.networks.get(i).run(inputs);
+			this.evaluateAndUpdate(networks.get(i), inputs);
 		}
 	}										
 
 
 	public void runCycle() {
-		for (int setNum = 0; setNum < inputs.length; setNum++) {
-			this.runSet(inputs[setNum]);			
+		for (int setNum = 0; setNum < TrialInputs.length; setNum++) {
+			this.runSet(TrialInputs[setNum]);			
 		}
 
 		this.compare();
-		//		this.cullAndCreate();
+		this.cullAndCreate();
 
+	}
+	
+	public void run() {
+		for(int i = 0; i < this.cycles; i++) {
+			this.runCycle();
+		}
 	}
 
 	public void compare(){
@@ -72,41 +75,31 @@ public class Trial {
 		Collections.sort(this.networks, Collections.reverseOrder()); // reverse order because high score first
 	}
 
-	//Make abstract later, and make classes that extend trial.  MyTrial, ColorTrial...
-	//This method takes in a network and it's outputs.  then evaluates those outputs against the answer and updates the network
-	public void evaluate(Network net, ArrayList<Double> outputs, RandColor color) {
-		//This one is specific to ColorTrial
-		//Determine NetworkOutput
-		String NetworkOut = "";
-		if (outputs.get(0) > outputs.get(1) && outputs.get(0) > outputs.get(2)) {
-			NetworkOut = "Red";
-		}
-		if (outputs.get(1) > outputs.get(0) && outputs.get(1) > outputs.get(2)) {
-			NetworkOut = "Green";
-		}
-		if (outputs.get(2) > outputs.get(0) && outputs.get(2) > outputs.get(1)) {
-			NetworkOut = "Blue";
-		}
-
-		//Determine color
-		String answer = "";
-		if (color.values[0] > color.values[1] && color.values[0] > color.values[2]) {
-			answer = "Red";
-		}
-		if (color.values[1] > color.values[0] && color.values[1] > color.values[2]) {
-			answer = "Green";
-		}
-		if (color.values[2] > color.values[1] && color.values[2] > color.values[0]) {
-			answer = "Blue";
-		}
-
-		if (NetworkOut.equals(answer)) {
-			net.incScore();
-		}
+	public void cullAndCreate() {//top 10% -> top 10% morph * 10% / other 90% morph * 5% | next 10% morph * 2%.  makes 75% morphed, then 25% random
+		this.theBest.clear();
+		this.theBest.addAll(this.networks.subList(0,  (int) (this.networks.size() * 0.2))); // grab the top 20% and put them into 'theBest'
+		this.networks.clear();
+		//I tried but I lost it.  It's too late.  try again next time.  format is in testStuff
+		
+		
+		
+		
+		
+		
+		
+		
 	}
+	
+	//This method takes in a network and it's outputs.  then evaluates those outputs against the answer and updates the network
+	public abstract void evaluateAndUpdate(Network net, Double[] SetInputs);
+	
+	
+	//This method is the final evaluation.  If score updates after each set, then it can just plut in evaluateAndUpdate().
+	//  else it can take the state variables and compute a score
+	public abstract void finalEvaluateAndScore(Network net, Double[] SetInputs);
+	
 }
-
-
+	
 
 
 
