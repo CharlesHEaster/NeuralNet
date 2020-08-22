@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Network implements Comparable<Network>{
 
 	private ArrayList<ArrayList<Node>> nodes;
-	private Integer score;
+	private Double score;
 	private ArrayList<Integer> heredity;
 	private int children;
 	private ArrayList<ArrayList<Double>> outputs;
@@ -116,9 +116,21 @@ public class Network implements Comparable<Network>{
 
 	public void incScore() {
 		this.score++;
+	}	
+	public void incScore(double inc) {
+		this.score += inc;
+	}
+	public void incScore(int inc) {
+		this.score += inc;
+	}
+	public void incScore(Double inc) {
+		this.score += inc;
+	}
+	public void incScore(Integer inc) {
+		this.score += inc;
 	}
 
-	public Integer getScore() {
+	public Double getScore() {
 		return this.score;
 	}
 
@@ -189,7 +201,7 @@ public class Network implements Comparable<Network>{
 	//constructors
 	public Network(int[] structure) {  //new network, random nodes, first gen
 		createNodes(structure);
-		this.score = 0;
+		this.score = 0.0;
 		this.heredity = new ArrayList<Integer>();
 		this.heredity.add(Network.FirstGen);
 		Network.FirstGen++;
@@ -200,38 +212,21 @@ public class Network implements Comparable<Network>{
 		this.networkOutput = new ArrayList<Double>();
 	}
 
-	public Network(ArrayList<ArrayList<Node>> nodes, ArrayList<Integer> hered) {
+	public Network(ArrayList<ArrayList<Node>> nodes, ArrayList<Integer> hered) {//new Network, product of a morph
 		this.nodes = nodes;
 		this.heredity = hered;
 		this.nodes = new ArrayList<ArrayList<Node>>();
-		this.score = 0;
-		int children;
+		this.score = 0.0;
+		int children = 0;
 		this.outputs = new ArrayList<ArrayList<Double>>();
 		ArrayList<Double> out1 = new ArrayList<Double>();
 		outputs.add(out1);
 		this.networkOutput = new ArrayList<Double>();
 	   }
 
-//         ----Non Implemented or Tested Phone Code----
-////	public void show(graphics g){
-////	   //set x and y canvas max
-////	   //set node size as fraction of y
-////	   //draw nodes and weights
-////	   int yInterval = yMax / this.nodes.length;
-////	   for (int i = 0; i < this.nodes.length; i++){
-////	      Int xInterval = xMax /   
-////	         this.nodes[i].length;
-////	      for ( int j = 0; j < this.nodes[i].length;
-////	         j++){
-////	         //draw the node, shaded for output
-////	           g.elipse( (j+1)*xInterval, (i+1)*yInterval, idontcareanymore.  Figureitoutwhenyouarecoding
-////	         //draw weights, stroke=map(weight, -1, 1, 0, strokeMax)
-////	}
-//
 	@Override
-	public int compareTo(Network o) {
-
-		return this.getScore().compareTo(o.getScore());
+	public int compareTo(Network o) { //to run a sort method on ArrayList<Network> networks need to be able to be compared.  
+		return this.getScore().compareTo(o.getScore()); //This Override effectively tells the compare function which variable to use.
 	} 
 
 }

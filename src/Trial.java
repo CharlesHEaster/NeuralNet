@@ -77,9 +77,31 @@ public abstract class Trial {
 
 	public void cullAndCreate() {//top 10% -> top 10% morph * 10% / other 90% morph * 5% | next 10% morph * 2%.  makes 75% morphed, then 25% random
 		this.theBest.clear();
-		this.theBest.addAll(this.networks.subList(0,  (int) (this.networks.size() * 0.2))); // grab the top 20% and put them into 'theBest'
+		int top1 = (int)(this.numNetworks * 0.01);
+		int top10 = (int)(this.numNetworks * 0.10);
+		int top20 = (int)(this.numNetworks * 0.20);
+		this.theBest.addAll(this.networks.subList(0,  top20)); // grab the top 20% and put them into 'theBest'
+		if (this.fillTheMorgue$) {
+			this.theMorgue.addAll(this.networks.subList(top20,  this.networks.size() - 1));
+		}
 		this.networks.clear();
-		//I tried but I lost it.  It's too late.  try again next time.  format is in testStuff
+		for (int i = 0; i < this.theBest.size(); i++) { // roll through those top 20%
+			if (i < top1) {								
+				for (int j = 0; j < 10; j++) {			// top 1% get 10 children
+					this.networks.add(this.theBest.get(i).morph());
+				}
+			} else if (i < top10) {
+				for (int j = 0; j < 5; j++) {			// top 1% - 10% get 5 children
+					this.networks.add(this.theBest.get(i).morph());
+				}
+			} else {									// top 10% - 20% get 2 children
+				this.networks.add(this.theBest.get(i).morph());
+				this.networks.add(this.theBest.get(i).morph());
+			}			
+		}
+		while (this.networks.size() < numNetworks) {	//fill in the rest of the networks with random 1stGen.  
+			this.networks.add(new Network(this.structure));
+		}
 		
 		
 		
@@ -91,12 +113,12 @@ public abstract class Trial {
 	}
 	
 	//This method takes in a network and it's outputs.  then evaluates those outputs against the answer and updates the network
-	public abstract void evaluateAndUpdate(Network net, Double[] SetInputs);
+	public abstract void evaluateAndUpdate(Network net, Double[] SetOfInputs);
 	
 	
 	//This method is the final evaluation.  If score updates after each set, then it can just plut in evaluateAndUpdate().
 	//  else it can take the state variables and compute a score
-	public abstract void finalEvaluateAndScore(Network net, Double[] SetInputs);
+	public abstract void finalEvaluateAndScore(Network net, Double[] SetOfInputs);
 	
 }
 	
