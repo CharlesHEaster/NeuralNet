@@ -30,6 +30,14 @@ public class Node {
 	public double getWeight(int i) {
 		return this.weights[i];
 	}
+	
+	public double getBias() {
+		return this.weights[this.weights.length - 1];
+	}
+	
+	public void setBias(double bias) {
+		this.weights[this.weights.length - 1] = bias;
+	}
 
 	public double getOutput() {
 		return this.output;
@@ -87,6 +95,7 @@ public class Node {
 		for (int i = 0; i < this.inputs.size(); i++) {
 			rawOutput += inputs.get(i) * weights[i];
 		}
+		rawOutput += this.weights[this.weights.length - 1];
 		this.output = Math.tanh(rawOutput);
 
 		return this.output;
@@ -108,27 +117,21 @@ public class Node {
 	}
 
 	public static double[] makeWeightsFromScratch(int numWeights){ 
-		double[] weights = new double[numWeights];
-		boolean allZeros$ = true;
-		if (numWeights < 6){//if 1 third of weights is not greater than 2, thus if numWeights < 6
+		double[] weights = new double[numWeights + 1];
+		if (numWeights < 6){// less than 6 weights would make too high a ratio of 0 weights
 			for (int i = 0; i < numWeights; i++) {
 				weights[i] = (Math.random() * 2) - 1; //each weight is a random value between -1 and 1
-				allZeros$ = false;
 			}
-		} else { //else numWeights > 6, each node will average at least 2 weights
+			weights[numWeights] = Math.random() - 0.5;// bias between -.5 and .5
+		} else { //if numWeights > 6, each node will average at least 2 weights.  ideal
 			for (int i = 0; i < numWeights; i++) {
 				if (Math.random() > 0.3){ // 1 in three weights will have value
 					weights[i] = (Math.random() * 2) - 1;
 				} else {
 					weights[i] = 0;
 				}
-				if (weights[i] == 0) { //if this weight is not 0
-					allZeros$ = false;    // flip allZeros$ to false
-				}
+				weights[numWeights] = Math.random() - 0.5; 
 			}
-		}
-		if (allZeros$){ // if all the weights are 0, try again
-			weights = Node.makeWeightsFromScratch(numWeights);
 		}
 		return weights;
 	}
