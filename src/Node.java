@@ -32,15 +32,31 @@ public class Node {
 	}
 	
 	public double getBias() {
-		return this.weights[this.weights.length - 1];
+		if (this instanceof OutputNode) {
+			System.out.println("Error 3418: Tried to retrieve Bias of an Output Node");
+			return 0.0;
+		} else {
+			return this.weights[this.weights.length - 1];
+		}
 	}
+
 	
 	public void setBias(double bias) {
+		if (this instanceof OutputNode) {
+			System.out.println("Error 3419: Tried to assgn Bias to an Output Node");
+		} else {
+			bias = bias > 1 ? 1 : bias;
+			bias = bias < -1 ? -1 : bias;
 		this.weights[this.weights.length - 1] = bias;
+		}
 	}
 
 	public double getOutput() {
 		return this.output;
+	}
+	
+	public void setOutput(double out) {
+		this.output = out;
 	}
 
 	// utilities
@@ -90,10 +106,10 @@ public class Node {
 	}
 	
 	public double calcOutput() {
-		//Activation function changed from bespoke "Frankenstein Equation" to tanh().  See note at end of code
+		//Activation function changed from strange "Frankenstein Equation" to tanh().  See note at end of code
 		double rawOutput = 0;
 		for (int i = 0; i < this.inputs.size(); i++) {
-			rawOutput += inputs.get(i) * weights[i];
+			rawOutput += this.inputs.get(i) * this.weights[i];
 		}
 		rawOutput += this.weights[this.weights.length - 1];
 		this.output = Math.tanh(rawOutput);
