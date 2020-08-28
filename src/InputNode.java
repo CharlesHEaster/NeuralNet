@@ -24,9 +24,11 @@ public class InputNode extends Node{
 
 
 	@Override
-	public double calcOutput() { // maps input from min -> max to -1 > 1
+	public double calcOutput() { 
 		this.output = (this.input - this.min) / (this.max - this.min);
-		this.output = (this.output * 2) - 1;		
+		this.output = (this.output * 2) - 1;
+		this.output = this.output * this.getWeight(0);
+		this.output += this.getBias();
 		
 		return this.output;
 	}

@@ -4,7 +4,7 @@ import java.util.Collections;
 public abstract class Trial {
 
 
-	ArrayList<Network> networks, theBest, theMorgue;
+	private ArrayList<Network> networks, theBest, theMorgue;
 	private int cycles, numNetworks;
 	private int[] structure;
 	private Double[][] TrialInputs;
@@ -21,6 +21,14 @@ public abstract class Trial {
 
 	public void setTrialInputs(Double[][] trialInputs) {
 		this.TrialInputs = trialInputs;
+	}
+	
+	public ArrayList<Network> getTheBest(){
+		return this.theBest;
+	}
+	
+	public Network getTheBest(int i){
+		return this.theBest.get(i);
 	}
 	
 	//constructors
@@ -75,6 +83,7 @@ public abstract class Trial {
 	}
 
 	public void compare(){
+		System.out.println();
 		this.networks.addAll(this.theBest);
 		Collections.sort(this.networks, Collections.reverseOrder()); // reverse order because high score first
 	}
@@ -85,35 +94,41 @@ public abstract class Trial {
 		int top10 = (int)(this.numNetworks * 0.10);
 		int top20 = (int)(this.numNetworks * 0.20);
 		this.theBest.addAll(this.networks.subList(0,  top20)); // grab the top 20% and put them into 'theBest'
+		System.out.print("theBest ");
+		for (int i = 0; i < this.theBest.size(); i++) {
+			System.out.print("[" + this.theBest.get(i).toStringHered() + "] ");
+		}
+		System.out.print("\n");
 		if (this.fillTheMorgue$) {
 			this.theMorgue.addAll(this.networks.subList(top20,  this.networks.size() - 1));
 		}
 		this.networks.clear();
 		for (int i = 0; i < this.theBest.size(); i++) { // roll through those top 20%
-			if (i < top1) {								
+			if (i < top1) {	
+//				System.out.println("Morph " + i + " x10");
 				for (int j = 0; j < 10; j++) {			// top 1% get 10 children
 					this.networks.add(this.theBest.get(i).morph());
 				}
 			} else if (i < top10) {
+//				System.out.println("Morph " + i + " x5");
 				for (int j = 0; j < 5; j++) {			// top 1% - 10% get 5 children
 					this.networks.add(this.theBest.get(i).morph());
 				}
 			} else {									// top 10% - 20% get 2 children
 				this.networks.add(this.theBest.get(i).morph());
 				this.networks.add(this.theBest.get(i).morph());
+//				System.out.println("Morph " + i + " x2");
 			}			
 		}
 		while (this.networks.size() < numNetworks) {	//fill in the rest of the networks with random 1stGen.  
 			this.networks.add(new Network(this.structure));
+//			System.out.println("New Net");
 		}
-		
-		
-		
-		
-		
-		
-		
-		
+		System.out.print("Networks ");
+		for (int i = 0; i < this.networks.size(); i++) {
+			System.out.print("[" + this.networks.get(i).toStringHered() + "] ");
+		}
+		System.out.print("\n");
 	}
 	
 	//This method takes in a network and it's outputs.  then evaluates those outputs against the answer and updates the network

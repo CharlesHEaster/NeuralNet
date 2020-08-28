@@ -39,12 +39,14 @@ public class Network implements Comparable<Network>{
 	//6. add that ArrayList to double ArrayList of all node outputs for the network
 	//7. repeat until all nodes are used.  Last column of outputs is network output.
 		this.outputs.clear();
+		
 		for (int i = 0; i < nodes.size(); i++) {
 			ArrayList<Double> nextOutput = new ArrayList<Double>();
 			for (int j = 0; j < nodes.get(i).size(); j++) {
 				if (nodes.get(i).get(j) instanceof InputNode ) {
 					((InputNode) nodes.get(i).get(j)).setInput(inputs[j]);
-					nextOutput.add(nodes.get(i).get(j).calcOutput());					
+					nextOutput.add(nodes.get(i).get(j).calcOutput());
+
 				} else {
 					nodes.get(i).get(j).setInputs(this.outputs.get(i - 1));
 					nextOutput.add(nodes.get(i).get(j).calcOutput());
@@ -58,6 +60,14 @@ public class Network implements Comparable<Network>{
 	
 	public void resetOutputs() {
 		this.outputs = new ArrayList<ArrayList<Double>>();
+	}
+	
+	public String toStringHered() {
+		String h = "";
+		for (int i = 0; i < this.heredity.size(); i++) {
+			h += heredity.get(i).toString() + "-";
+		}
+		return h;
 	}
 	
 	public String toString() {
@@ -83,14 +93,9 @@ public class Network implements Comparable<Network>{
 			str += "  Outputs [";
 			for (int i = 0; i < this.networkOutput.size(); i++) {
 				str += String.format("%.3f, ", this.networkOutput.get(i));
-				if (i == this.networkOutput.size() - 1) {
-					str += "]";
-				} else {
-					str += ", ";
 				}
+			str = str.substring(0, str.length() - 2) + "]";
 			}
-		}
-
 		return str;	
 	}
 	
@@ -215,7 +220,6 @@ public class Network implements Comparable<Network>{
 	public Network(ArrayList<ArrayList<Node>> nodes, ArrayList<Integer> hered) {//new Network, product of a morph
 		this.nodes = nodes;
 		this.heredity = hered;
-		this.nodes = new ArrayList<ArrayList<Node>>();
 		this.score = 0.0;
 		int children = 0;
 		this.outputs = new ArrayList<ArrayList<Double>>();
@@ -223,7 +227,7 @@ public class Network implements Comparable<Network>{
 		outputs.add(out1);
 		this.networkOutput = new ArrayList<Double>();
 	   }
-
+	
 	@Override
 	public int compareTo(Network o) { //to run a sort method on ArrayList<Network> networks need to be able to be compared.  
 		return this.getScore().compareTo(o.getScore()); //This Override effectively tells the compare function which variable to use.

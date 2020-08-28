@@ -9,7 +9,7 @@ public class Node {
 
 	// getters and setters
 	public void setInputs(ArrayList<Double> inpu) {
-		if (inpu.size() != this.weights.length) {
+		if (inpu.size() != this.weights.length - 1) {
 			System.out.println("ERROR 212: Node given incorrect number of inputs");
 		}
 		this.inputs = inpu;
@@ -98,7 +98,7 @@ public class Node {
 		if (this.inputs != null) {
 			str += "\nInputs [";
 			for( double input: this.inputs){
-				str += input + ", ";
+				str += String.format("%.3f, ", input);
 			}
 			str = str.substring(0, str.length() - 2) + "]";
 		}
