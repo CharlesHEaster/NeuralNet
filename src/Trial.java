@@ -19,6 +19,10 @@ public abstract class Trial {
 		return this.networks;
 	}
 
+	public void setTrialInputs(Double[][] trialInputs) {
+		this.TrialInputs = trialInputs;
+	}
+	
 	//constructors
 	public Trial(int numNetworks, int numCycles, int[] netStructure, Double[][] trialInputs){
 		//setup

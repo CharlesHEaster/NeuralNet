@@ -2,8 +2,13 @@ import java.util.ArrayList;
 
 public class ColorTrial extends Trial {
 
-	public ColorTrial(int numNetworks, int numCycles, int[] netStructure, Double[][] trialInputs) {
-		super(numNetworks, numCycles, netStructure, trialInputs);
+	public ColorTrial(int numNetworks, int numCycles, int[] netStructure, int numColors) {
+		super(numNetworks, numCycles, netStructure, new Double[][]{});
+		Double[][] trialInputs = new Double[numColors][];
+		for (int i = 0; i < numColors; i++) {
+			trialInputs[i] = ColorTrial.randColor();
+		}
+		this.setTrialInputs(trialInputs);
 	}
 
 	@Override
@@ -44,8 +49,8 @@ public class ColorTrial extends Trial {
 		this.evaluateAndUpdate(net, SetInputs);
 	}
 
-	public static double[ ] randColor(){
-		double[ ] color = new double[3];
+	public static Double[] randColor(){
+		Double[ ] color = new Double[3];
 		color[0] = (Math.floor(Math.random() * 256));
 		color[1] = (Math.floor(Math.random() * 256));
 		while (color[1] == color[0]) {
