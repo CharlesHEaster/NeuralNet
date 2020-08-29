@@ -16,6 +16,10 @@ public class OutputNode extends Node{
 		}
 	}
 	
+	public OutputNode(double[] weights) {
+		super(weights);
+	}
+	
 	@Override
 	public void setInputs(ArrayList<Double> inpu) {
 		if (inpu.size() != this.getWeights().length) {
@@ -35,5 +39,21 @@ public class OutputNode extends Node{
 		this.setOutput(output);
 
 		return output;
+	}
+	
+	@Override
+	public Node morph() {
+		double[] newWeights = new double[this.getWeights().length];
+		for (int i = 0; i < this.getWeights().length; i++) {
+			if (Math.random() > .7) { //3 in 10 nodes will be randomly adjusted
+				double rando = (Math.random() - 0.5) * 0.4; //they will be randomly adjusted by range(-0.2 -> +0.2)
+				newWeights[i] = this.getWeight(i) + rando;
+				newWeights[i] = newWeights[i] > 1 ? 1 : newWeights[i]; //check new weight is not more than 1
+				newWeights[i] = newWeights[i] < -1 ? -1 : newWeights[i];  //check new weight is not less than -1
+			} else {
+				newWeights[i] = this.getWeights()[i]; // 7 in 10 nodes will be left as is
+			}
+		}
+		return new OutputNode(newWeights);
 	}
 }

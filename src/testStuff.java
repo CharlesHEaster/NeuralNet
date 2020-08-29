@@ -8,9 +8,8 @@ public class testStuff {
 	  strut[0] = 3;
 	  strut[1] = 5;
 	  strut[2] = 3;
-	  ColorTrial C = new ColorTrial(100, 100, strut, 100);
+	  ColorTrial C = new ColorTrial(10, 10, strut, 10);
 	  C.run();
-	  
 	
   }
 }

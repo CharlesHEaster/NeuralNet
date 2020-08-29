@@ -150,7 +150,7 @@ public abstract class Trial {
 		while (this.networks.size() < numNetworks) {	//fill in the rest of the networks with random 1stGen.  
 			this.networks.add(new Network(this.structure));
 		}
-		System.out.print(" Score: " + this.theBest.get(0).getScore() + "\n");
+		System.out.print(" Score: " + this.theBest.get(0).getScore() + "\r\n");
 	}
 	
 	 public static String dateAndTime() {

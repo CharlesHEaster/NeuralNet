@@ -41,17 +41,20 @@ public class Network implements Comparable<Network>{
 	//6. add that ArrayList to double ArrayList of all node outputs for the network
 	//7. repeat until all nodes are used.  Last column of outputs is network output.
 		this.outputs.clear();
-		
 		for (int i = 0; i < nodes.size(); i++) {
 			ArrayList<Double> nextOutput = new ArrayList<Double>();
 			for (int j = 0; j < nodes.get(i).size(); j++) {
+				Node n = nodes.get(i).get(j);
 				if (nodes.get(i).get(j) instanceof InputNode ) {
-					((InputNode) nodes.get(i).get(j)).setInput(inputs[j]);
-					nextOutput.add(nodes.get(i).get(j).calcOutput());
+					((InputNode) n).setInput(inputs[j]);
+					nextOutput.add(n.calcOutput());
 
+				} else if (n instanceof OutputNode){
+					n.setInputs(this.outputs.get(i - 1));
+					nextOutput.add(n.calcOutput());
 				} else {
-					nodes.get(i).get(j).setInputs(this.outputs.get(i - 1));
-					nextOutput.add(nodes.get(i).get(j).calcOutput());
+					n.setInputs(this.outputs.get(i - 1));
+					nextOutput.add(n.calcOutput());
 				}
 			}
 			this.outputs.add(nextOutput);
@@ -73,7 +76,7 @@ public class Network implements Comparable<Network>{
 	}
 	
 	public String toString() {
-		String str = "Network {\nHeredity [";
+		String str = "Network {\r\nHeredity [";
 		for (int i = 0; i < this.heredity.size(); i++) {
 			str += this.heredity.get(i);
 			if (i == this.heredity.size() - 1) {
@@ -91,18 +94,18 @@ public class Network implements Comparable<Network>{
 				str += ", ";
 			}
 		}
-		str += "Score: " + this.getScore() + "\n";
+		str += "Score: " + this.getScore() + "\r\n";
 		str += "Nodes::";
 		for (int i = 0; i < this.nodes.size(); i++) {
 			for (int j = 0; j < this.nodes.get(i).size(); j++) {
-				str += "\n   Node[" + i + "][" + j + "] ";
+				str += "\r\n   Node[" + i + "][" + j + "] ";
 				Node n = this.nodes.get(i).get(j);
 				if (i == 0 && n instanceof InputNode) {
 					str += "--InputNode--";
 				} else if (i == this.nodes.size() - 1 && n instanceof OutputNode) {
 					str += "--OutputNode--";
 				}
-				str += "\n      ";
+				str += "\r\n      ";
 				for (int k = 0; k < n.getWeights().length; k++) {
 					if (!(n instanceof OutputNode) && k == n.getWeights().length - 1) {
 						str += "[BIAS:" + n.getWeight(k) + "]";
@@ -110,13 +113,13 @@ public class Network implements Comparable<Network>{
 						str += "[" + n.getWeight(k) + "] ";
 					}
 					if ( k != 0 && k % 5 == 0 && k != n.getWeights().length - 1) {
-						str += "\n      "; 
+						str += "\r\n      "; 
 					} 
 				}
 				
 			}
 		}
-		str += "\n}\n";
+		str += "\r\n}\r\n";
 		return str;	
 	}
 

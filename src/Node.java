@@ -11,6 +11,10 @@ public class Node {
 	public void setInputs(ArrayList<Double> inpu) {
 		if (inpu.size() != this.weights.length - 1) {
 			System.out.println("ERROR 212: Node given incorrect number of inputs");
+			System.out.println(this.getWeights().length);
+			System.out.println(inpu.size());
+			System.out.println("InputNode " + (this instanceof InputNode));
+			System.out.println("OutputNode " + (this instanceof OutputNode));
 		}
 		this.inputs = inpu;
 	}
