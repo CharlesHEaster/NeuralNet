@@ -3,12 +3,17 @@ import java.util.ArrayList;
 public class ColorTrial extends Trial {
 
 	public ColorTrial(int numNetworks, int numCycles, int[] netStructure, int numColors) {
-		super(numNetworks, numCycles, netStructure, new Double[][]{});
+		super(numNetworks, numCycles, netStructure, new Double[][] {}, new String[] {});
 		Double[][] trialInputs = new Double[numColors][];
 		for (int i = 0; i < numColors; i++) {
 			trialInputs[i] = ColorTrial.randColor();
 		}
 		this.setTrialInputs(trialInputs);
+		String[] inputLegend = new String[3];
+		inputLegend[0] = "Red";
+		inputLegend[1] = "Green";
+		inputLegend[2] = "Blue";
+		this.setInputLegend(inputLegend);
 	}
 
 	@Override

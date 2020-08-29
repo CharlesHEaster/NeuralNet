@@ -21,6 +21,8 @@ public class Network implements Comparable<Network>{
 			for (int j = 0; j < structure[i]; j++) {
 				if (i == 0) {
 					temp.add(new InputNode());
+				} else if (i == structure.length - 1){
+					temp.add(new OutputNode(structure[i - 1]));
 				} else {
 					temp.add(new Node(structure[i - 1]));
 				}
@@ -71,16 +73,7 @@ public class Network implements Comparable<Network>{
 	}
 	
 	public String toString() {
-		String str = "Network Structure[";
-		for (int i = 0; i < this.nodes.size(); i++) {
-			str += this.nodes.get(i).size();
-			if (i == this.nodes.size() - 1) {
-				str += "]";
-			} else {
-				str += ", ";
-			}
-		}
-		str += "  Heredity [";
+		String str = "Network {\nHeredity [";
 		for (int i = 0; i < this.heredity.size(); i++) {
 			str += this.heredity.get(i);
 			if (i == this.heredity.size() - 1) {
@@ -89,30 +82,42 @@ public class Network implements Comparable<Network>{
 				str += ", ";
 			}
 		}
-		if (!this.networkOutput.isEmpty()) {
-			str += "  Outputs [";
-			for (int i = 0; i < this.networkOutput.size(); i++) {
-				str += String.format("%.3f, ", this.networkOutput.get(i));
-				}
-			str = str.substring(0, str.length() - 2) + "]";
+		str += "  Network Structure[";
+		for (int i = 0; i < this.nodes.size(); i++) {
+			str += this.nodes.get(i).size();
+			if (i == this.nodes.size() - 1) {
+				str += "]  ";
+			} else {
+				str += ", ";
 			}
-		return str;	
-	}
-	
-	public String toStringDetail() {
-		String message = "\n";
-		for (int i = 0; i < nodes.size(); i++) {
-			message += "[";
-			for (int j = 0; j < nodes.get(i).size(); j++) {
-				message += this.nodes.get(i).get(j).toStringBasic();
-				if (j != nodes.get(i).size() - 1) {
-					message += " ";
-				}
-			}
-			message += "]\n";
 		}
-
-		return this.toString() + message; 
+		str += "Score: " + this.getScore() + "\n";
+		str += "Nodes::";
+		for (int i = 0; i < this.nodes.size(); i++) {
+			for (int j = 0; j < this.nodes.get(i).size(); j++) {
+				str += "\n   Node[" + i + "][" + j + "] ";
+				Node n = this.nodes.get(i).get(j);
+				if (i == 0 && n instanceof InputNode) {
+					str += "--InputNode--";
+				} else if (i == this.nodes.size() - 1 && n instanceof OutputNode) {
+					str += "--OutputNode--";
+				}
+				str += "\n      ";
+				for (int k = 0; k < n.getWeights().length; k++) {
+					if (!(n instanceof OutputNode) && k == n.getWeights().length - 1) {
+						str += "[BIAS:" + n.getWeight(k) + "]";
+					} else {
+						str += "[" + n.getWeight(k) + "] ";
+					}
+					if ( k != 0 && k % 5 == 0 && k != n.getWeights().length - 1) {
+						str += "\n      "; 
+					} 
+				}
+				
+			}
+		}
+		str += "\n}\n";
+		return str;	
 	}
 
 	public ArrayList<Double> getOutput() {
