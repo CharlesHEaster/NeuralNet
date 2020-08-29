@@ -67,5 +67,33 @@ public class ColorTrial extends Trial {
 		}
 		return color;
 	}
+	
+	@Override
+	public void printBestToFile(int numBest) {
+		numBest = numBest > this.getNumNetworks() * 0.20 ? (int) (this.getNumNetworks() * 0.20) : numBest;
+  String contents = "Color Trial, completed: " + Trial.dateAndTime() + "    Networks Trained for: " + Trial.convertNanoTime(this.getElapsed()) + "\n";
+		contents += "   # of Networks : " + this.getNumNetworks() + "\n";
+		contents += "     # of Cycles : " + this.getNumCycles() + "\n";
+		contents += "Network Structure: " + this.getStructure().toString() + "\n";
+		if (this.getMorgue()) {
+			contents += "Dead Networks were KEPT\n";
+		} else {
+			contents += "Dead Networks were DISCARDED\n";
+		}
+		contents += "Input Legend\n";
+		contents += this.getInputLegend().toString() + "\n\n";
+		contents += this.getTrialInputs().toString() + "\n\n";
+		
+		contents += "The Best Networks\n";
+		for (int i = 0; i < numBest; i++) {
+			contents += this.getTheBest(i).toString();
+		}
+		
+		
+		
+		
+		Trial.writeFile("ColorTrialResults", contents);
+		System.out.println(contents);
+	}
 
 }

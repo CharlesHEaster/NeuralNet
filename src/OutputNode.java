@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class OutputNode extends Node{
@@ -13,6 +14,15 @@ public class OutputNode extends Node{
 		if (!(N instanceof OutputNode)) {
 			this.setWeights(Arrays.copyOf(this.getWeights(), this.getWeights().length - 1));
 		}
+	}
+	
+	@Override
+	public void setInputs(ArrayList<Double> inpu) {
+		if (inpu.size() != this.getWeights().length) {
+			System.out.println("ERROR 212: Node given incorrect number of inputs");
+			System.out.println(this.getClass());
+		}
+		this.inputs = inpu;
 	}
 	
 	@Override

@@ -1,3 +1,9 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -10,21 +16,46 @@ public abstract class Trial {
 	private Double[][] TrialInputs;
 	private boolean fillTheMorgue$;
 	private String[] InputLegend;
+	private long Start, Elapsed;
 
 	public void setMorgue(boolean fill$) {
 		this.fillTheMorgue$ = fill$;
 	}
 	
+	public boolean getMorgue() {
+		return this.fillTheMorgue$;
+	}
+	
+	public int getNumNetworks() {
+		return this.numNetworks;
+	}
+	
+	public int getNumCycles() {
+		return this.cycles;
+	}
+	
 	public ArrayList<Network> getNetworks(){
 		return this.networks;
+	}
+	
+	public int[] getStructure() {
+		return this.structure;
 	}
 
 	public void setTrialInputs(Double[][] trialInputs) {
 		this.TrialInputs = trialInputs;
 	}
 	
+	public Double[][] getTrialInputs(){
+		return this.TrialInputs;
+	}
+	
 	public void setInputLegend(String[] inputLegend) {
 		this.InputLegend = inputLegend;
+	}
+	
+	public String[] getInputLegend() {
+		return this.InputLegend;
 	}
 	
 	public ArrayList<Network> getTheBest(){
@@ -33,6 +64,10 @@ public abstract class Trial {
 	
 	public Network getTheBest(int i){
 		return this.theBest.get(i);
+	}
+	
+	public long getElapsed() {
+		return this.Elapsed;
 	}
 	
 	//constructors
@@ -57,10 +92,13 @@ public abstract class Trial {
 
 
 	public void run() {
+		this.Start = System.nanoTime();
 		for(int i = 0; i < this.cycles; i++) {
 			System.out.print("Cycle: " + i + "/" + this.cycles + " :: ");
 			this.runCycle();
 		}
+		this.Elapsed = System.nanoTime() - this.Start;
+		printBestToFile(this.getTheBest().size());
 	}
 	
 	public void runCycle() {
@@ -115,6 +153,63 @@ public abstract class Trial {
 		System.out.print(" Score: " + this.theBest.get(0).getScore() + "\n");
 	}
 	
+	 public static String dateAndTime() {
+		  DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd--HH-mm-ss");  
+		  LocalDateTime now = LocalDateTime.now();  
+
+		  return dtf.format(now);
+	  }
+	 
+	 public static String convertNanoTime(long time) {
+		 String str = "";
+		 int minutes = 0, hours = 0, days = 0;
+		 int seconds = (int) (time / 1000000000);
+		 if (seconds > 60) {
+			 minutes = (int) Math.floor(seconds / 60);
+			 seconds = seconds % 60;
+		 }
+		 if (minutes > 60) {
+			 hours = minutes / 60;
+			 minutes = minutes % 60;
+		 }
+		 if (hours > 24) {
+			 days = hours / 24;
+			 hours = hours % 24;
+			 str = days + "d ";
+		 }
+		 if (hours > 0) {
+			 str += hours + "h ";
+		 }
+		 if (minutes > 0) {
+			 str += minutes + "m ";
+		 }
+		 str += seconds + "s";
+		 
+		 return str;
+	 }
+
+	 public static void writeFile(String dirName, String value){
+		    String directoryName = dirName;
+		    String fileName = Trial.dateAndTime() + ".txt";
+
+		    File directory = new File(directoryName);
+		    if (! directory.exists()){
+		        directory.mkdir();
+		    }
+
+		    File file = new File(directoryName + "/" + fileName);
+		    try{
+		        FileWriter fw = new FileWriter(file.getAbsoluteFile());
+		        BufferedWriter bw = new BufferedWriter(fw);
+		        bw.write(value);
+		        bw.close();
+		    }
+		    catch (IOException e){
+		        e.printStackTrace();
+		        System.exit(-1);
+		    }
+	  }
+	
 	//This method takes in a network and it's outputs.  then evaluates those outputs against the answer and updates the network
 	public abstract void evaluateAndUpdate(Network net, Double[] SetOfInputs);
 	
@@ -122,6 +217,8 @@ public abstract class Trial {
 	//This method is the final evaluation.  If score updates after each set, then it can just put in evaluateAndUpdate().
 	//  else it can take the state variables and compute a score
 	public abstract void finalEvaluateAndScore(Network net, Double[] SetOfInputs);
+	
+	public abstract void printBestToFile(int numBest);
 	
 }
 	
