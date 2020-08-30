@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ColorTrial extends Trial {
 
@@ -69,22 +70,24 @@ public class ColorTrial extends Trial {
 	}
 	
 	@Override
-	public void printBestToFile(int numBest) {
+	public void printBestToFile(int numBest) 
+	{
 		numBest = numBest > this.getNumNetworks() * 0.20 ? (int) (this.getNumNetworks() * 0.20) : numBest;
-  String contents = "Color Trial, completed: " + Trial.dateAndTime() + "    Networks Trained for: " + Trial.convertNanoTime(this.getElapsed()) + "\n";
-		contents += "   # of Networks : " + this.getNumNetworks() + "\n";
-		contents += "     # of Cycles : " + this.getNumCycles() + "\n";
-		contents += "Network Structure: " + this.getStructure().toString() + "\n";
+  String contents = "Color Trial, completed: " + Trial.dateAndTime() + "    Networks Trained for: " + Trial.convertNanoTime(this.getElapsed()) + "\r\n";
+		contents += "   # of Networks : " + this.getNumNetworks() + "\r\n";
+		contents += "     # of Cycles : " + this.getNumCycles() + "\r\n";
+		contents += "Network Structure: " + Arrays.toString(this.getStructure()) + "\r\n";
 		if (this.getMorgue()) {
-			contents += "Dead Networks were KEPT\n";
+			contents += "Dead Networks: KEPT\r\n";
 		} else {
-			contents += "Dead Networks were DISCARDED\n";
+			contents += "Dead Networks: DISCARDED\r\n";
 		}
-		contents += "Input Legend\n";
-		contents += this.getInputLegend().toString() + "\n\n";
-		contents += this.getTrialInputs().toString() + "\n\n";
+		contents += "Input Legend\r\n";
+		contents += Arrays.toString(this.getInputLegend()) + "\r\n\r\n";
+		contents += "Inputs\r\n";
+		contents += this.stringTrialInputs() + "\r\n\r\n";
 		
-		contents += "The Best Networks\n";
+		contents += "THE BEST NETWORKS\r\n";
 		for (int i = 0; i < numBest; i++) {
 			contents += this.getTheBest(i).toString();
 		}
@@ -92,7 +95,7 @@ public class ColorTrial extends Trial {
 		
 		
 		
-		Trial.writeFile("ColorTrialResults", contents);
+		//Trial.writeFile("ColorTrialResults", contents);
 		System.out.println(contents);
 	}
 

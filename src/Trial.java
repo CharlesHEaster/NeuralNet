@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 public abstract class Trial {
@@ -69,6 +70,19 @@ public abstract class Trial {
 	public long getElapsed() {
 		return this.Elapsed;
 	}
+	
+	public Double[] getInputSet(int i){
+		return this.TrialInputs[i];
+	} 
+	
+	public String stringTrialInputs() {
+		String str = "";
+		for (int i = 0; i < this.getTrialInputs().length; i++) {
+			str += Arrays.toString(this.getInputSet(i));
+		}
+		return str;
+	}
+	
 	
 	//constructors
 	public Trial(int numNetworks, int numCycles, int[] netStructure, Double[][] trialInputs, String[] inputLegend){
@@ -219,6 +233,27 @@ public abstract class Trial {
 	public abstract void finalEvaluateAndScore(Network net, Double[] SetOfInputs);
 	
 	public abstract void printBestToFile(int numBest);
+	//EXAMPLE
+//	{
+//		numBest = numBest > this.getNumNetworks() * 0.20 ? (int) (this.getNumNetworks() * 0.20) : numBest;
+//  String contents = "Color Trial, completed: " + Trial.dateAndTime() + "    Networks Trained for: " + Trial.convertNanoTime(this.getElapsed()) + "\r\n";
+//		contents += "   # of Networks : " + this.getNumNetworks() + "\r\n";
+//		contents += "     # of Cycles : " + this.getNumCycles() + "\r\n";
+//		contents += "Network Structure: " + Arrays.toString(this.getStructure()) + "\r\n";
+//		if (this.getMorgue()) {
+//			contents += "Dead Networks: KEPT\r\n";
+//		} else {
+//			contents += "Dead Networks: DISCARDED\r\n";
+//		}
+//		contents += "Input Legend\r\n";
+//		contents += Arrays.toString(this.getInputLegend()) + "\r\n\r\n";
+//		contents += "Inputs\r\n";
+//		contents += this.stringTrialInputs() + "\r\n\r\n";
+//		
+//		contents += "THE BEST NETWORKS\r\n";
+//		for (int i = 0; i < numBest; i++) {
+//			contents += this.getTheBest(i).toString();
+//		}
 	
 }
 	

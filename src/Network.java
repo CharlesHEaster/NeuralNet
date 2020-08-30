@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Network implements Comparable<Network>{
 
@@ -8,6 +9,7 @@ public class Network implements Comparable<Network>{
 	private int children;
 	private ArrayList<ArrayList<Double>> outputs;
 	private ArrayList<Double> networkOutput;
+	private int[] structure;
 	// Network State variables for some future iteration
 //	private double[] stateVar; 
 //	private String[] stateString;
@@ -67,35 +69,14 @@ public class Network implements Comparable<Network>{
 		this.outputs = new ArrayList<ArrayList<Double>>();
 	}
 	
-	public String toStringHered() {
-		String h = "";
-		for (int i = 0; i < this.heredity.size(); i++) {
-			h += heredity.get(i).toString() + "-";
-		}
-		return h;
-	}
-	
 	public String toString() {
-		String str = "Network {\r\nHeredity [";
-		for (int i = 0; i < this.heredity.size(); i++) {
-			str += this.heredity.get(i);
-			if (i == this.heredity.size() - 1) {
-				str += "]";
-			} else {
-				str += ", ";
-			}
-		}
-		str += "  Network Structure[";
-		for (int i = 0; i < this.nodes.size(); i++) {
-			str += this.nodes.get(i).size();
-			if (i == this.nodes.size() - 1) {
-				str += "]  ";
-			} else {
-				str += ", ";
-			}
-		}
-		str += "Score: " + this.getScore() + "\r\n";
-		str += "Nodes::";
+		String str = "Network {\r\n Heredity ";
+		str += this.heredity.toString() + "\r\n";
+		str += " Network Structure ";
+		str += Arrays.toString(this.getStructure());
+
+		str += "  Score: " + this.getScore() + "\r\n";
+		str += " Nodes::";
 		for (int i = 0; i < this.nodes.size(); i++) {
 			for (int j = 0; j < this.nodes.get(i).size(); j++) {
 				str += "\r\n   Node[" + i + "][" + j + "] ";
@@ -149,6 +130,10 @@ public class Network implements Comparable<Network>{
 
 	public Node getNode(int col, int colnum) {
 		return this.nodes.get(col).get(colnum);
+	}
+	
+	public int[] getStructure() {
+		return this.structure;
 	}
 	
 	public ArrayList<Double> getNetworkOutput() {
@@ -212,8 +197,9 @@ public class Network implements Comparable<Network>{
 	}
 
 	//constructors
-	public Network(int[] structure) {  //new network, random nodes, first gen
-		createNodes(structure);
+	public Network(int[] struct) {  //new network, random nodes, first gen
+		createNodes(struct);
+		this.structure = struct;
 		this.score = 0.0;
 		this.heredity = new ArrayList<Integer>();
 		this.heredity.add(Network.FirstGen);
@@ -227,6 +213,10 @@ public class Network implements Comparable<Network>{
 
 	public Network(ArrayList<ArrayList<Node>> nodes, ArrayList<Integer> hered) {//new Network, product of a morph
 		this.nodes = nodes;
+		this.structure = new int[this.nodes.size()];
+		for (int i = 0; i < this.nodes.size(); i++) {
+			this.structure[i] = this.nodes.get(i).size();
+		}
 		this.heredity = hered;
 		this.score = 0.0;
 		int children = 0;
