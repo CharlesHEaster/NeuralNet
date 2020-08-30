@@ -10,11 +10,7 @@ public class ColorTrial extends Trial {
 			trialInputs[i] = ColorTrial.randColor();
 		}
 		this.setTrialInputs(trialInputs);
-		String[] inputLegend = new String[3];
-		inputLegend[0] = "Red";
-		inputLegend[1] = "Green";
-		inputLegend[2] = "Blue";
-		this.setInputLegend(inputLegend);
+		this.setInputLegend(new String[] {"Red", "Green", "Blue"});
 	}
 
 	@Override
@@ -85,7 +81,7 @@ public class ColorTrial extends Trial {
 		contents += "Input Legend\r\n";
 		contents += Arrays.toString(this.getInputLegend()) + "\r\n\r\n";
 		contents += "Inputs\r\n";
-		contents += this.stringTrialInputs() + "\r\n\r\n";
+		contents += ((Trial) this).stringTrialInputs() + "\r\n\r\n";
 		
 		contents += "THE BEST NETWORKS\r\n";
 		for (int i = 0; i < numBest; i++) {

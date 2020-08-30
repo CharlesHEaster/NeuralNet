@@ -77,6 +77,7 @@ public abstract class Trial {
 	
 	public String stringTrialInputs() {
 		String str = "";
+		System.out.println(this.getTrialInputs().length);
 		for (int i = 0; i < this.getTrialInputs().length; i++) {
 			str += Arrays.toString(this.getInputSet(i));
 		}
