@@ -18,6 +18,8 @@ public abstract class Trial {
 	private boolean fillTheMorgue$;
 	private String[] InputLegend;
 	private long Start, Elapsed;
+	private string workingMorgueFile = "";
+	private abstract string dir;
 
 	public void setMorgue(boolean fill$) {
 		this.fillTheMorgue$ = fill$;
@@ -114,6 +116,9 @@ public abstract class Trial {
 		}
 		this.Elapsed = System.nanoTime() - this.Start;
 		printBestToFile(this.getTheBest().size());
+		if (this.fillTheMorgue$){
+			Trial.closeTheMorgue();
+		}
 	}
 	
 	public void runCycle() {
@@ -145,7 +150,7 @@ public abstract class Trial {
 		int top20 = (int)(this.numNetworks * 0.20);
 		this.theBest.addAll(this.networks.subList(0,  top20)); // grab the top 20% and put them into 'theBest'
 		if (this.fillTheMorgue$) {
-			this.theMorgue.addAll(this.networks.subList(top20,  this.networks.size() - 1));
+			Trial.sendToTheMorgue(this.networks.subList(top20,  this.networks.size() - 1));
 		}
 		this.networks.clear();
 		for (int i = 0; i < this.theBest.size(); i++) { // roll through those top 20%
@@ -166,6 +171,38 @@ public abstract class Trial {
 			this.networks.add(new Network(this.structure));
 		}
 		System.out.print(" Score: " + this.theBest.get(0).getScore() + "\r\n");
+	}
+	
+	public static void sendToTheMorgue(ArrayList<Network> bodies){
+		if (! this.dir.exists()){
+			this.dir.mkdir();
+			Final workingMorgueFile = "WorkingMorgue.txt";
+			File file = new File(this.dir + "/" + workingMorgueFile);
+		} else {
+			if (workingMorgueFile == ""){
+				int i = 1;
+				while ((this.dir + "/" + "WorkingMorgue" + i + ".txt").exists) {
+					i++;
+				}
+				Final workingMorgueFile = "WorkingMorgue" + i + ".txt";
+				File file = new File(this.dir + "/" + workingMorgueFile);
+			}
+		try{
+		        FileWriter fw = new FileWriter(file.getAbsoluteFile());
+		        BufferedWriter bw = new BufferedWriter(fw);
+		        bw.write(bodies.toString());
+		        bw.close();
+		    }
+		    catch (IOException e){
+		        e.printStackTrace();
+		        System.exit(-1);
+		    }
+	
+	}
+		
+	public static void closeTheMorgue(){
+		// add trial info to the beginning of the file
+		// change theMorgue file name to match trialResults file name
 	}
 	
 	 public static String dateAndTime() {
@@ -203,8 +240,8 @@ public abstract class Trial {
 		 return str;
 	 }
 
-	 public static void writeFile(String dirName, String value){
-		    String directoryName = dirName;
+	 public static void writeFile(String value){
+		    String directoryName = this.dir;
 		    String fileName = Trial.dateAndTime() + ".txt";
 
 		    File directory = new File(directoryName);
