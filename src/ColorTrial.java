@@ -3,8 +3,6 @@ import java.util.Arrays;
 
 public class ColorTrial extends Trial {
 	
-	@Override
-	private static string dir = "ColorTrialResults";
 
 	public ColorTrial(int numNetworks, int numCycles, int[] netStructure, int numColors) {
 		super(numNetworks, numCycles, netStructure, new Double[][] {}, new String[] {});
@@ -14,6 +12,7 @@ public class ColorTrial extends Trial {
 		}
 		this.setTrialInputs(trialInputs);
 		this.setInputLegend(new String[] {"Red", "Green", "Blue"});
+		this.setDir("ColorTrialResults");
 	}
 
 	@Override
@@ -68,34 +67,5 @@ public class ColorTrial extends Trial {
 		return color;
 	}
 	
-	@Override
-	public void printBestToFile(int numBest) 
-	{
-		numBest = numBest > this.getNumNetworks() * 0.20 ? (int) (this.getNumNetworks() * 0.20) : numBest;
-  String contents = "Color Trial, completed: " + Trial.dateAndTime() + "    Networks Trained for: " + Trial.convertNanoTime(this.getElapsed()) + "\r\n";
-		contents += "   # of Networks : " + this.getNumNetworks() + "\r\n";
-		contents += "     # of Cycles : " + this.getNumCycles() + "\r\n";
-		contents += "Network Structure: " + Arrays.toString(this.getStructure()) + "\r\n";
-		if (this.getMorgue()) {
-			contents += "Dead Networks: KEPT\r\n";
-		} else {
-			contents += "Dead Networks: DISCARDED\r\n";
-		}
-		contents += "Input Legend\r\n";
-		contents += Arrays.toString(this.getInputLegend()) + "\r\n\r\n";
-		contents += "Inputs\r\n";
-		contents += ((Trial) this).stringTrialInputs() + "\r\n\r\n";
-		
-		contents += "THE BEST NETWORKS\r\n";
-		for (int i = 0; i < numBest; i++) {
-			contents += this.getTheBest(i).toString();
-		}
-		
-		
-		
-		
-		//Trial.writeFile(dir, contents);
-		System.out.println(contents);
-	}
 
 }

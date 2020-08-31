@@ -71,10 +71,9 @@ public class Network implements Comparable<Network>{
 	
 	public String toString() {
 		String str = "Network {\r\n Heredity ";
-		str += this.heredity.toString() + "\r\n";
-		str += " Network Structure ";
+		str += this.heredity.toString();
+		str += "\r\n  Network Structure ";
 		str += Arrays.toString(this.getStructure());
-
 		str += "  Score: " + this.getScore() + "\r\n";
 		str += " Nodes::";
 		for (int i = 0; i < this.nodes.size(); i++) {
@@ -100,7 +99,7 @@ public class Network implements Comparable<Network>{
 				
 			}
 		}
-		str += "\r\n}\r\n";
+		str += "\r\n}\r\n\r\n";
 		return str;	
 	}
 
