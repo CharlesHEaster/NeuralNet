@@ -2,6 +2,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ColorTrial extends Trial {
+	
+	@Override
+	private static string dir = "ColorTrialResults";
 
 	public ColorTrial(int numNetworks, int numCycles, int[] netStructure, int numColors) {
 		super(numNetworks, numCycles, netStructure, new Double[][] {}, new String[] {});
@@ -91,7 +94,7 @@ public class ColorTrial extends Trial {
 		
 		
 		
-		//Trial.writeFile("ColorTrialResults", contents);
+		//Trial.writeFile(dir, contents);
 		System.out.println(contents);
 	}
 
