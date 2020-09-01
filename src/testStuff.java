@@ -8,7 +8,7 @@ public class testStuff {
 
   public static void main(String[] args) {
 
-	  ColorTrial C = new ColorTrial(1000, 100, new int[] {3, 5, 5, 3}, 1000);
+	  ColorTrial C = new ColorTrial(100, 10, new int[] {3, 5, 5, 3}, 100);
 	  C.setMorgue(true);
 	  C.run();
 

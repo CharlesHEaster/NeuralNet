@@ -89,7 +89,6 @@ public abstract class Trial {
 
 	public String stringTrialInputs() {
 		String str = "";
-		System.out.println(this.getTrialInputs().length);
 		for (int i = 0; i < this.getTrialInputs().length; i++) {
 			str += Arrays.toString(this.getInputSet(i));
 		}
@@ -119,13 +118,16 @@ public abstract class Trial {
 
 
 	public void run() {
+		
 		this.Start = System.nanoTime();
 		for(int i = 0; i < this.cycles; i++) {
 			System.out.print("Cycle: " + i + "/" + this.cycles + " :: ");
 			this.runCycle();
 		}
 		this.Elapsed = System.nanoTime() - this.Start;
+		System.out.println("--Compiling and Publishing Results--");
 		this.printTrialResults();
+		System.out.println(":::::::::Training Program Complete:::::::::");
 	}
 
 	public void runCycle() {
@@ -213,7 +215,7 @@ public abstract class Trial {
 		str += Trial.readFile(this.getDir(), this.workingMorgueFile);
 		Trial.writeFile(this.getDir(), this.FileName + "--Morgue.txt", str);
 		File oldMorgue = new File(this.getDir() + "/" + this.workingMorgueFile);
-		System.out.println("Delete oldMorgue: " + oldMorgue.delete());
+		oldMorgue.delete();
 	}
 
 	public static String dateAndTime() {
@@ -304,7 +306,6 @@ public abstract class Trial {
 		}		
 		this.FileName = Trial.dateAndTime();
 		Trial.writeFile(this.getDir(), this.FileName + ".txt", contents);
-		System.out.println(contents);
 		if (this.fillTheMorgue$){
 			this.closeTheMorgue(); 
 		}
@@ -364,7 +365,6 @@ public abstract class Trial {
 				  ex.printStackTrace();
 			  }
 		  }
-		  System.out.println(file);
 		  return file;
 		  
 	  }
