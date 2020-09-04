@@ -8,9 +8,17 @@ public class testStuff {
 
   public static void main(String[] args) {
 
-	  ColorTrial C = new ColorTrial(100, 10, new int[] {3, 5, 5, 3}, 100);
-	  C.setMorgue(true);
-	  C.run();
+	  InputNode I = new InputNode(10, 6.3);
+	  for (int i = 0; i < 100; i++) {
+		  I.setInput(Math.floor(Math.random() * 10000) / 100);
+		  System.out.println(i);
+		  System.out.println(I.getHist().toString());
+		  System.out.println("Min " + I.getMin());
+		  System.out.println("Max " + I.getMax());
+		  System.out.println("-----------------");
+	  }
+	  
+	  
 
   
 }

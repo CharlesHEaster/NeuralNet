@@ -48,6 +48,8 @@ public class Node {
 	public void setBias(double bias) {
 		if (this instanceof OutputNode) {
 			System.out.println("Error 3419: Tried to assgn Bias to an Output Node");
+		} else if (this instanceof InputNode) {
+			this.weights[0] = bias;
 		} else {
 			bias = bias > 1 ? 1 : bias;
 			bias = bias < -1 ? -1 : bias;
@@ -127,10 +129,10 @@ public class Node {
 			if (Math.random() > .7) { //3 in 10 nodes will be randomly adjusted
 				double rando = (Math.random() - 0.5) * 0.4; //they will be randomly adjusted by range(-0.2 -> +0.2)
 				newWeights[i] = this.weights[i] + rando;
-				newWeights[i] = newWeights[i] > 1 ? 1 : newWeights[i]; //check new weight is not more than 1
-				newWeights[i] = newWeights[i] < -1 ? -1 : newWeights[i];  //check new weight is not less than -1
+				newWeights[i] = newWeights[i] > 1 ? 1 : newWeights[i];
+				newWeights[i] = newWeights[i] < -1 ? -1 : newWeights[i];
 			} else {
-				newWeights[i] = this.weights[i]; // 7 in 10 nodes will be left as is
+				newWeights[i] = this.weights[i];
 			}
 		}
 		return new Node(newWeights);
@@ -138,20 +140,8 @@ public class Node {
 
 	public static double[] makeWeightsFromScratch(int numWeights){ 
 		double[] weights = new double[numWeights + 1];
-		if (numWeights < 6){// less than 6 weights would make too high a ratio of 0 weights
-			for (int i = 0; i < numWeights; i++) {
-				weights[i] = (Math.random() * 2) - 1; //each weight is a random value between -1 and 1
-			}
-			weights[numWeights] = Math.random() - 0.5;// bias between -.5 and .5
-		} else { //if numWeights > 6, each node will average at least 2 weights.  ideal
-			for (int i = 0; i < numWeights; i++) {
-				if (Math.random() > 0.3){ // 1 in three weights will have value
-					weights[i] = (Math.random() * 2) - 1;
-				} else {
-					weights[i] = 0;
-				}
-				weights[numWeights] = Math.random() - 0.5; 
-			}
+		for (int i = 0; i <= numWeights; i++) {
+			weights[i] = (Math.random() * 2) - 1;
 		}
 		return weights;
 	}

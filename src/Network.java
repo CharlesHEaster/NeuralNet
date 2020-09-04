@@ -69,6 +69,12 @@ public class Network implements Comparable<Network>{
 		this.outputs = new ArrayList<ArrayList<Double>>();
 	}
 	
+	public void clearInputHistories() {
+		for (int i = 0; i < nodes.get(0).size(); i++) {
+			((InputNode) nodes.get(0).get(i)).clearHistory();
+		}
+	}
+	
 	public String toString() {
 		String str = "Network {\r\n Heredity ";
 		str += this.heredity.toString();
