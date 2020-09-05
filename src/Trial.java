@@ -14,9 +14,9 @@ public abstract class Trial {
 
 
 	private ArrayList<Network> networks, theBest;
-	private int cycles, numNetworks, numDead;
-	private int[] structure;
-	private Double[][] TrialInputs;
+	private int cycles, numNetworks, numDead, numHistoryInputs;
+	private int[] structure; inputHistoryStructure;
+	private ArrayList<ArrayList<Double>> TrialInputs;
 	private boolean fillTheMorgue$;
 	private String[] InputLegend;
 	private long Start, Elapsed;
@@ -94,22 +94,49 @@ public abstract class Trial {
 		}
 		return str;
 	}
+	
+	public int[] getInputHistoryStructure(){
+		return this.inputHistoryStructure;
+	}
+	
+	public int getNumHistoryInputs(){
+		return this.numHistoryInputs;
+	}
 
 
 	//constructors
-	public Trial(int numNetworks, int numCycles, int[] netStructure, Double[][] trialInputs, String[] inputLegend){
+	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend, int numHistoryInpu, int[] inputHistoryStrut){
 		//setup
+		this.numHistoryInputs = numHistoryInpu;
+		this.inputHistoryStructure = inputHistoryStrut;
+		this.InputLegend = inputLegend;
+		Arraylist<Double> temp = trialInputs;
+		this.TrialInputs = new ArrayList<Double>();
+		for (int k = 0; k < this.TrialInputs.size(); k++){
+			ArrayList<Double> setInputs = new ArrayList<Double>();
+			for (int i = 0; i < this.numHistoryInputs; i++){
+				for (int j = 0; j < this.inputHistoryStrut.length; j++){
+					this.setInputs.add(temp.get(i);
+				}
+			}
+			for (int i = this.numHistoryInputs; i < temp.size(); i ++){
+				this.setInputs.add(temp.get(i));	
+			}
+			this.TrialInputs.add(setInputs);
+		}
+		
+		
 		this.networks = new ArrayList<Network>();
 		this.numNetworks = numNetworks;
+		this.structure = netStructure;
 		for (int i = 0; i < numNetworks; i++) {
-			this.networks.add(new Network(netStructure));
+			this.networks.add(new Network(this.structure, this.numHistoryInputs, this.inputHistoryStructure));
 		}
 		this.theBest = new ArrayList<Network>();
 		this.cycles = numCycles;
-		this.structure = netStructure;
-		this.TrialInputs = trialInputs;
+
+		
 		this.fillTheMorgue$ = false;
-		this.InputLegend = inputLegend;
 	}
 
 	//Set = A set of inputs
