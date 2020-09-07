@@ -15,6 +15,53 @@ public class Network implements Comparable<Network>{
 //	private String[] stateString;
 	private static int FirstGen; // Static in Network assumes only one group of networks at a time, which is true
 
+	//constructors
+		public Network(int[] struct) {  //new network, random nodes, first gen
+			createNodes(struct);
+			this.structure = struct;
+			this.score = 0.0;
+			this.heredity = new ArrayList<Integer>();
+			this.heredity.add(Network.FirstGen);
+			Network.FirstGen++;
+			int children = 0;
+			this.outputs = new ArrayList<ArrayList<Double>>();
+			ArrayList<Double> out1 = new ArrayList<Double>();
+			outputs.add(out1);
+			this.networkOutput = new ArrayList<Double>();
+			this.checkNetStructure();
+		}
+
+		public Network(ArrayList<ArrayList<Node>> nodes, ArrayList<Integer> hered) {//new Network, product of a morph
+			this.nodes = nodes;
+			this.structure = new int[this.nodes.size()];
+			for (int i = 0; i < this.nodes.size(); i++) {
+				this.structure[i] = this.nodes.get(i).size();
+			}
+			this.heredity = hered;
+			this.score = 0.0;
+			int children = 0;
+			this.outputs = new ArrayList<ArrayList<Double>>();
+			ArrayList<Double> out1 = new ArrayList<Double>();
+			outputs.add(out1);
+			this.networkOutput = new ArrayList<Double>();
+			this.checkNetStructure();
+		   }
+		
+		public Network(int[] netStructure, int numUniqueInputs, int numHistoryInputs, int[] inputHistoryStructure) {
+			this.structure = netStructure;
+			this.score = 0.0;
+			this.heredity = new ArrayList<Integer>();
+			this.heredity.add(Network.FirstGen);
+			Network.FirstGen++;
+			int children = 0;
+			this.outputs = new ArrayList<ArrayList<Double>>();
+			ArrayList<Double> out1 = new ArrayList<Double>();
+			outputs.add(out1);
+			this.networkOutput = new ArrayList<Double>();
+			createNodes(netStructure, numUniqueInputs, numHistoryInputs, inputHistoryStructure);
+			this.checkNetStructure();
+		}
+	
 	//utilities
 	private void createNodes(int[] structure) {
 		this.nodes = new ArrayList<ArrayList<Node>>();
@@ -31,9 +78,43 @@ public class Network implements Comparable<Network>{
 			}
 			this.nodes.add(temp);
 		}
+		this.checkNetStructure();
+	}
+	//TODO:     ^that works fine.     \/that is broken
+	private void createNodes(int[] netStructure, int numUniqueInputs, int numHistoryInputs, int[] inputHistoryStructure) {
+		this.nodes = new ArrayList<ArrayList<Node>>();
+		for (int i = 0; i < structure.length; i++) {
+			ArrayList<Node> currentLayer = new ArrayList<Node>();
+			if (i == 0) {
+				for (int j = 0; j < numHistoryInputs; j++) {
+					for (int k = 0; k < inputHistoryStructure.length; k++) {
+						currentLayer.add(new InputNode(inputHistoryStructure[k]));
+					}
+				}
+				for (int j = numHistoryInputs; j < numUniqueInputs; j++) {
+					currentLayer.add(new InputNode());
+				}
+			} else if ( i == structure.length - 1) {
+				currentLayer.add(new OutputNode(structure[i - 1]));
+			} else {
+				currentLayer.add(new Node(structure[i - 1]));
+			}
+
+			this.nodes.add(currentLayer);
+		}
+		this.checkNetStructure();
 	}
 	
-	public ArrayList<Double> run(Double[] inputs) {
+	public int[] checkNetStructure() {
+		int[] netStructure = new int[this.nodes.size()];
+		for (int i = 0; i < this.nodes.size(); i++) {
+			netStructure[i] = this.nodes.get(i).size();
+		}
+		this.structure = netStructure;
+		return netStructure;
+	}
+	
+	public ArrayList<Double> run(ArrayList<Double> inputs) {
 	//1. Iterate through levels (columns) of nodes.
 	//2. Iterate through individual nodes (step down each column)
 	//3. if first column of nodes (hence input nodes), input only the corresponding input from "inputs"
@@ -48,7 +129,7 @@ public class Network implements Comparable<Network>{
 			for (int j = 0; j < nodes.get(i).size(); j++) {
 				Node n = nodes.get(i).get(j);
 				if (nodes.get(i).get(j) instanceof InputNode ) {
-					((InputNode) n).setInput(inputs[j]);
+					((InputNode) n).setInput(inputs.get(j));
 					nextOutput.add(n.calcOutput());
 
 				} else if (n instanceof OutputNode){
@@ -76,6 +157,7 @@ public class Network implements Comparable<Network>{
 	}
 	
 	public String toString() {
+		this.checkNetStructure();
 		String str = "Network {\r\n Heredity ";
 		str += this.heredity.toString();
 		str += "\r\n  Network Structure ";
@@ -138,6 +220,7 @@ public class Network implements Comparable<Network>{
 	}
 	
 	public int[] getStructure() {
+		this.checkNetStructure();
 		return this.structure;
 	}
 	
@@ -201,36 +284,6 @@ public class Network implements Comparable<Network>{
 		return new Network(newNodes, newHered);
 	}
 
-	//constructors
-	public Network(int[] struct) {  //new network, random nodes, first gen
-		createNodes(struct);
-		this.structure = struct;
-		this.score = 0.0;
-		this.heredity = new ArrayList<Integer>();
-		this.heredity.add(Network.FirstGen);
-		Network.FirstGen++;
-		int children = 0;
-		this.outputs = new ArrayList<ArrayList<Double>>();
-		ArrayList<Double> out1 = new ArrayList<Double>();
-		outputs.add(out1);
-		this.networkOutput = new ArrayList<Double>();
-	}
-
-	public Network(ArrayList<ArrayList<Node>> nodes, ArrayList<Integer> hered) {//new Network, product of a morph
-		this.nodes = nodes;
-		this.structure = new int[this.nodes.size()];
-		for (int i = 0; i < this.nodes.size(); i++) {
-			this.structure[i] = this.nodes.get(i).size();
-		}
-		this.heredity = hered;
-		this.score = 0.0;
-		int children = 0;
-		this.outputs = new ArrayList<ArrayList<Double>>();
-		ArrayList<Double> out1 = new ArrayList<Double>();
-		outputs.add(out1);
-		this.networkOutput = new ArrayList<Double>();
-	   }
-	
 	@Override
 	public int compareTo(Network o) { //to run a sort method on ArrayList<Network> networks need to be able to be compared.  
 		return this.getScore().compareTo(o.getScore()); //This Override effectively tells the compare function which variable to use.

@@ -14,8 +14,8 @@ public abstract class Trial {
 
 
 	private ArrayList<Network> networks, theBest;
-	private int cycles, numNetworks, numDead, numHistoryInputs;
-	private int[] structure; inputHistoryStructure;
+	private int cycles, numNetworks, numDead, numUniqueInputs, numHistoryInputs;
+	private int[] netStructure, inputHistoryStructure;
 	private ArrayList<ArrayList<Double>> TrialInputs;
 	private boolean fillTheMorgue$;
 	private String[] InputLegend;
@@ -52,14 +52,14 @@ public abstract class Trial {
 	}
 
 	public int[] getStructure() {
-		return this.structure;
+		return this.netStructure;
 	}
 
-	public void setTrialInputs(Double[][] trialInputs) {
+	public void setTrialInputs(ArrayList<ArrayList<Double>> trialInputs) {
 		this.TrialInputs = trialInputs;
 	}
 
-	public Double[][] getTrialInputs(){
+	public ArrayList<ArrayList<Double>> getTrialInputs(){
 		return this.TrialInputs;
 	}
 
@@ -83,14 +83,14 @@ public abstract class Trial {
 		return this.Elapsed;
 	}
 
-	public Double[] getInputSet(int i){
-		return this.TrialInputs[i];
+	public ArrayList<Double> getInputSet(int i){
+		return this.TrialInputs.get(i);
 	} 
 
 	public String stringTrialInputs() {
 		String str = "";
-		for (int i = 0; i < this.getTrialInputs().length; i++) {
-			str += Arrays.toString(this.getInputSet(i));
+		for (int i = 0; i < this.getTrialInputs().size(); i++) {
+			str += this.getInputSet(i).toString();
 		}
 		return str;
 	}
@@ -102,41 +102,50 @@ public abstract class Trial {
 	public int getNumHistoryInputs(){
 		return this.numHistoryInputs;
 	}
+	
+	public Network getNetwork(int i) {
+		return this.networks.get(i);
+	}
 
 
 	//constructors
-	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend, int numHistoryInpu, int[] inputHistoryStrut){
-		//setup
-		this.numHistoryInputs = numHistoryInpu;
-		this.inputHistoryStructure = inputHistoryStrut;
+	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend){
 		this.InputLegend = inputLegend;
-		Arraylist<Double> temp = trialInputs;
-		this.TrialInputs = new ArrayList<Double>();
-		for (int k = 0; k < this.TrialInputs.size(); k++){
-			ArrayList<Double> setInputs = new ArrayList<Double>();
-			for (int i = 0; i < this.numHistoryInputs; i++){
-				for (int j = 0; j < this.inputHistoryStrut.length; j++){
-					this.setInputs.add(temp.get(i);
-				}
-			}
-			for (int i = this.numHistoryInputs; i < temp.size(); i ++){
-				this.setInputs.add(temp.get(i));	
-			}
-			this.TrialInputs.add(setInputs);
-		}
-		
-		
+		this.TrialInputs = trialInputs;
 		this.networks = new ArrayList<Network>();
 		this.numNetworks = numNetworks;
-		this.structure = netStructure;
+		this.netStructure = netStructure;
 		for (int i = 0; i < numNetworks; i++) {
-			this.networks.add(new Network(this.structure, this.numHistoryInputs, this.inputHistoryStructure));
+			this.networks.add(new Network(this.netStructure));
 		}
 		this.theBest = new ArrayList<Network>();
 		this.cycles = numCycles;
 
-		
 		this.fillTheMorgue$ = false;
+	}
+	
+	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend, int numUniqueInputs, int numHistoryInpu, int[] inputHistoryStrut){
+		this(numNetworks, numCycles, netStructure, trialInputs, inputLegend);
+		this.numUniqueInputs = numUniqueInputs;
+		this.numHistoryInputs = numHistoryInpu;
+		this.inputHistoryStructure = inputHistoryStrut;
+		this.TrialInputs = new ArrayList<ArrayList<Double>>();
+		for (int k = 0; k < trialInputs.size(); k++){
+			ArrayList<Double> setOfInputs = new ArrayList<Double>();
+			for (int i = 0; i < this.numHistoryInputs; i++){
+				for (int j = 0; j < this.inputHistoryStructure.length; j++){
+					setOfInputs.add(trialInputs.get(k).get(i));
+				}
+			}
+			for (int i = this.numHistoryInputs; i < trialInputs.size(); i ++){
+				setOfInputs.add(trialInputs.get(k).get(i));	
+			}
+			this.TrialInputs.add(setOfInputs);
+		}
+		this.networks = new ArrayList<Network>();
+		for (int i = 0; i < numNetworks; i++) {
+			this.networks.add(new Network(this.netStructure, this.numUniqueInputs, this.numHistoryInputs, this.inputHistoryStructure));
+		}
 	}
 
 	//Set = A set of inputs
@@ -158,14 +167,14 @@ public abstract class Trial {
 	}
 
 	public void runCycle() {
-		for (int setNum = 0; setNum < TrialInputs.length; setNum++) {
-			this.runSet(TrialInputs[setNum]);			
+		for (int setNum = 0; setNum < TrialInputs.size(); setNum++) {
+			this.runSet(TrialInputs.get(setNum));			
 		}
 		this.compare();
 		this.cullAndCreate();
 	}
 
-	public void runSet(Double[] inputs){
+	public void runSet(ArrayList<Double> inputs){
 		// run a set of inputs
 		for (int i = 0; i < this.networks.size(); i++){
 			this.networks.get(i).resetOutputs();			
@@ -206,7 +215,7 @@ public abstract class Trial {
 			}			
 		}
 		while (this.networks.size() < numNetworks) {	//fill in the rest of the networks with random 1stGen.  
-			this.networks.add(new Network(this.structure));
+			this.networks.add(new Network(this.netStructure));
 		}
 		System.out.print(" Score: " + this.theBest.get(0).getScore() + "\r\n");
 	}
@@ -316,12 +325,12 @@ public abstract class Trial {
 	}
 
 	//This method takes in a network and it's outputs.  then evaluates those outputs against the answer and updates the network
-	public abstract void evaluateAndUpdate(Network net, Double[] SetOfInputs);
+	public abstract void evaluateAndUpdate(Network net, ArrayList<Double> SetOfInputs);
 
 
 	//This method is the final evaluation.  If score updates after each set, then it can just put in evaluateAndUpdate().
 	//  else it can take the state variables and compute a score
-	public abstract void finalEvaluateAndScore(Network net, Double[] SetOfInputs);
+	public abstract void finalEvaluateAndScore(Network net, ArrayList<Double> SetOfInputs);
 
 	public void printTrialResults() {
 		String contents = getTrialHeader();

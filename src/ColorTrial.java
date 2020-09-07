@@ -5,19 +5,31 @@ public class ColorTrial extends Trial {
 	
 
 	public ColorTrial(int numNetworks, int numCycles, int[] netStructure, int numColors) {
-		super(numNetworks, numCycles, netStructure, new Double[][] {}, new String[] {});
-		Double[][] trialInputs = new Double[numColors][];
-		for (int i = 0; i < numColors; i++) {
-			trialInputs[i] = ColorTrial.randColor();
-		}
-		this.setTrialInputs(trialInputs);
+		super(numNetworks, numCycles, netStructure, new ArrayList<ArrayList<Double>>(), new String[] {});
+		this.setTrialInputs(ColorTrial.makeSomeColors(numColors));
 		this.setInputLegend(new String[] {"Red", "Green", "Blue"});
 		this.setDir("ColorTrialResults");
 	}
+	
+	public ColorTrial(int numNetworks, int numCycles, int[] netStructure, int numColors, int numUniqueInputs, int numHistoryInpu, int[] inputHistoryStrut) {
+		super(numNetworks, numCycles, netStructure, new ArrayList<ArrayList<Double>>(), new String[] {}, numUniqueInputs, numHistoryInpu, inputHistoryStrut);
+		this.setTrialInputs(ColorTrial.makeSomeColors(numColors));
+		this.setInputLegend(new String[] {"Red", "Green", "Blue"});
+		this.setDir("ColorTrialResults");
+		
+	}
 
+	
+	public static ArrayList<ArrayList<Double>> makeSomeColors(int num){
+		ArrayList<ArrayList<Double>> arrayListOfColors = new ArrayList<ArrayList<Double>>();
+		for (int i = 0; i < num; i++) {
+			arrayListOfColors.add(ColorTrial.randColor());
+		}
+		return arrayListOfColors;
+	}
 	@Override
 	//This method takes in a network and it's outputs.  then evaluates those outputs against the answer and updates the network (score or state variables)
-	public void evaluateAndUpdate(Network net, Double[ ] inputColor) {
+	public void evaluateAndUpdate(Network net, ArrayList<Double> inputColor) {
 		//Decode NetworkOutput
 		String NetworkOut = "";
 		ArrayList<Double> outputs = net.getOutput();
@@ -33,14 +45,14 @@ public class ColorTrial extends Trial {
 
 		//Determine color
 		String answer = "";
-		Double[ ] color = inputColor;
-		if (color[0] > color[1] && color[0] > color[2]) {
+		ArrayList<Double> color = inputColor;
+		if (color.get(0) > color.get(1) && color.get(0) > color.get(2)) {
 			answer = "Red";
 		}
-		if (color[1] > color[0] && color[1] > color[2]) {
+		if (color.get(1) > color.get(0) && color.get(1) > color.get(2)) {
 			answer = "Green";
 		}
-		if (color[2] > color[1] && color[2] > color[0]) {
+		if (color.get(2) > color.get(1) && color.get(2) > color.get(0)) {
 			answer = "Blue";
 		}
 		if (NetworkOut.equals(answer)) {
@@ -49,20 +61,20 @@ public class ColorTrial extends Trial {
 	} 
 	
 	@Override
-	public void finalEvaluateAndScore(Network net, Double[] SetInputs) {
+	public void finalEvaluateAndScore(Network net, ArrayList<Double> SetInputs) {
 		this.evaluateAndUpdate(net, SetInputs);
 	}
 
-	public static Double[] randColor(){
-		Double[ ] color = new Double[3];
-		color[0] = (Math.floor(Math.random() * 256));
-		color[1] = (Math.floor(Math.random() * 256));
-		while (color[1] == color[0]) {
-			color[1] = (Math.floor(Math.random() * 256));
+	public static ArrayList<Double> randColor(){
+		ArrayList<Double> color = new ArrayList<Double>();
+		for (int i = 0; i < 3; i++) {
+			color.add(Math.floor(Math.random() * 256));
 		}
-		color[2] = Math.floor(Math.random() * 256);
-		while (color[2] == color[0] || color[2] == color[1]) {
-			color[2] = Math.floor(Math.random() * 256);
+		while (color.get(0) == color.get(1) || color.get(1) == color.get(2)) {
+			color.set(1,  Math.floor(Math.random() * 256));
+		}
+		while (color.get(1) == color.get(2) || color.get(2) == color.get(0)) {
+			color.set(2,  Math.floor(Math.random() * 256));
 		}
 		return color;
 	}
