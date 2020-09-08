@@ -80,7 +80,6 @@ public class Network implements Comparable<Network>{
 		}
 		this.checkNetStructure();
 	}
-	//TODO:     ^that works fine.     \/that is broken
 	private void createNodes(int[] netStructure, int numUniqueInputs, int numHistoryInputs, int[] inputHistoryStructure) {
 		this.nodes = new ArrayList<ArrayList<Node>>();
 		for (int i = 0; i < structure.length; i++) {
@@ -95,9 +94,13 @@ public class Network implements Comparable<Network>{
 					currentLayer.add(new InputNode());
 				}
 			} else if ( i == structure.length - 1) {
-				currentLayer.add(new OutputNode(structure[i - 1]));
+				for (int j = 0; j < structure[i]; j++){
+					currentLayer.add(new OutputNode(structure[i - 1]));
+				}
 			} else {
-				currentLayer.add(new Node(structure[i - 1]));
+				for (int j = 0; j < structure[i]; j++){
+					currentLayer.add(new Node(structure[i - 1]));
+				}
 			}
 
 			this.nodes.add(currentLayer);
