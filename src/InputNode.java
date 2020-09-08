@@ -3,9 +3,10 @@ import java.util.ArrayList;
 public class InputNode extends Node{
 	private double min;
 	private double max;
-	private double input;
+	private Double input;
 	private int histCapasity = -1;
 	private ArrayList<Double> history;
+	private int inputIdentifier = -1;
 	
 	public InputNode() {
 		super(0);
@@ -13,21 +14,23 @@ public class InputNode extends Node{
 		this.max = 0;
 	}
 	
-	public InputNode(int hist) {
+	public InputNode(int inputIdentifier, int histCapasity) {
 		super(0);
 		this.min = 0;
 		this.max = 0;
-		this.histCapasity = hist;
+		this.histCapasity = histCapasity;
 		this.history = new ArrayList<Double>();
+		this.inputIdentifier = inputIdentifier;
 	}
 	
-	public InputNode(int hist, double bias) {
+	public InputNode(int inputIdentifier, int hist, double bias) {
 		super(0);
 		this.min = 0;
 		this.max = 0;
 		this.histCapasity = hist;
 		this.setBias(bias);
 		this.history = new ArrayList<Double>();
+		this.inputIdentifier = inputIdentifier;
 	}
 	
 	public InputNode(double bias) {
@@ -37,6 +40,9 @@ public class InputNode extends Node{
 		this.setBias(bias);
 	}
 	
+	public int getInputIdentifier() {
+		return this.inputIdentifier;
+	}
 	public double getMin() {
 		return this.min;
 	}
@@ -62,7 +68,7 @@ public class InputNode extends Node{
 		this.history.clear();
 	}
 	
-	public void setInput(double input) { 
+	public void setInput(Double input) { 
 		if (this.min == 0 && this.max == 0) {
 			this.min = input - .0000000001;
 			this.max = input + .0000000001;
@@ -74,8 +80,7 @@ public class InputNode extends Node{
 			this.max = input > this.max ? input : this.max;
 		} else {
 			while (history.size() >= histCapasity) {
-				removed = this.history.get(0);
-				this.history.remove(0);
+				removed = this.history.remove(0);
 			}
 			this.history.add(input);
 			if (removed == this.min || removed == this.max || this.input > this.max || this.input < this.min) {
@@ -106,6 +111,6 @@ public class InputNode extends Node{
 			newBias = newBias > 1 ? 1 : newBias;
 			newBias = newBias < -1 ? -1 : newBias;
 		}
-		return new InputNode(this.histCapasity, newBias);
+		return new InputNode(this.inputIdentifier, this.histCapasity, newBias);
 	}
 }

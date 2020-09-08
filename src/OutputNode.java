@@ -56,4 +56,9 @@ public class OutputNode extends Node{
 		}
 		return new OutputNode(newWeights);
 	}
+	
+	@Override
+	public void setBias(double nope) {
+		System.out.println("Error 312: Tried to set bias of an OutputNode.  " + nope);
+	}
 }

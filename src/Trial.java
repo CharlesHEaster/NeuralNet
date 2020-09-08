@@ -23,6 +23,50 @@ public abstract class Trial {
 	private String workingMorgueFile = "";
 	private String dir, FileName;
 
+	//constructors
+	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend){
+		this.InputLegend = inputLegend;
+		this.TrialInputs = trialInputs;
+		this.networks = new ArrayList<Network>();
+		this.numNetworks = numNetworks;
+		this.netStructure = netStructure;
+		for (int i = 0; i < numNetworks; i++) {
+			this.networks.add(new Network(this.netStructure));
+		}
+		this.theBest = new ArrayList<Network>();
+		this.cycles = numCycles;
+
+		this.fillTheMorgue$ = false;
+	}
+
+	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend, int numUniqueInputs, int numHistoryInpu, int[] inputHistoryStrut){
+		this(numNetworks, numCycles, netStructure, trialInputs, inputLegend);
+		this.numUniqueInputs = numUniqueInputs;
+		this.numHistoryInputs = numHistoryInpu;
+		this.inputHistoryStructure = inputHistoryStrut;
+		this.TrialInputs = new ArrayList<ArrayList<Double>>();
+		for (int k = 0; k < trialInputs.size(); k++){
+			ArrayList<Double> setOfInputs = new ArrayList<Double>();
+			for (int i = 0; i < this.numHistoryInputs; i++){
+				for (int j = 0; j < this.inputHistoryStructure.length; j++){
+					setOfInputs.add(trialInputs.get(k).get(i));
+				}
+			}
+			for (int i = this.numHistoryInputs; i < trialInputs.size(); i ++){
+				setOfInputs.add(trialInputs.get(k).get(i));	
+			}
+			this.TrialInputs.add(setOfInputs);
+		}
+		this.networks = new ArrayList<Network>();
+		for (int i = 0; i < numNetworks; i++) {
+			this.networks.add(new Network(this.netStructure, this.numUniqueInputs, this.numHistoryInputs, this.inputHistoryStructure));
+		}
+	}
+
+	public int[] getHistStructure() {
+		return this.inputHistoryStructure;
+	}
+	
 	public void setDir(String directory) {
 		this.dir = directory;
 	}
@@ -94,67 +138,27 @@ public abstract class Trial {
 		}
 		return str;
 	}
-	
+
 	public int[] getInputHistoryStructure(){
 		return this.inputHistoryStructure;
 	}
-	
+
 	public int getNumHistoryInputs(){
 		return this.numHistoryInputs;
 	}
-	
+
 	public Network getNetwork(int i) {
 		return this.networks.get(i);
 	}
 
-
-	//constructors
-	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend){
-		this.InputLegend = inputLegend;
-		this.TrialInputs = trialInputs;
-		this.networks = new ArrayList<Network>();
-		this.numNetworks = numNetworks;
-		this.netStructure = netStructure;
-		for (int i = 0; i < numNetworks; i++) {
-			this.networks.add(new Network(this.netStructure));
-		}
-		this.theBest = new ArrayList<Network>();
-		this.cycles = numCycles;
-
-		this.fillTheMorgue$ = false;
-	}
 	
-	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend, int numUniqueInputs, int numHistoryInpu, int[] inputHistoryStrut){
-		this(numNetworks, numCycles, netStructure, trialInputs, inputLegend);
-		this.numUniqueInputs = numUniqueInputs;
-		this.numHistoryInputs = numHistoryInpu;
-		this.inputHistoryStructure = inputHistoryStrut;
-		this.TrialInputs = new ArrayList<ArrayList<Double>>();
-		for (int k = 0; k < trialInputs.size(); k++){
-			ArrayList<Double> setOfInputs = new ArrayList<Double>();
-			for (int i = 0; i < this.numHistoryInputs; i++){
-				for (int j = 0; j < this.inputHistoryStructure.length; j++){
-					setOfInputs.add(trialInputs.get(k).get(i));
-				}
-			}
-			for (int i = this.numHistoryInputs; i < trialInputs.size(); i ++){
-				setOfInputs.add(trialInputs.get(k).get(i));	
-			}
-			this.TrialInputs.add(setOfInputs);
-		}
-		this.networks = new ArrayList<Network>();
-		for (int i = 0; i < numNetworks; i++) {
-			this.networks.add(new Network(this.netStructure, this.numUniqueInputs, this.numHistoryInputs, this.inputHistoryStructure));
-		}
-	}
-
 	//Set = A set of inputs
 	//Cycle = all sets run once, then compare and cull
 	//Trial = all cycles
 
 
 	public void run() {
-		
+
 		this.Start = System.nanoTime();
 		for(int i = 0; i < this.cycles; i++) {
 			System.out.print("Cycle: " + i + "/" + this.cycles + " :: ");
@@ -355,7 +359,7 @@ public abstract class Trial {
 
 		return contents;
 	}
-	
+
 	public String toStringMorgue() {
 		String str = "";
 		if (this.getMorgue()) {
@@ -363,47 +367,47 @@ public abstract class Trial {
 		} else {
 			str += "Dead Networks: DISCARDED\r\n";
 		}
-		
+
 		return str;		
 	}
-	
+
 	public String toStringInputs() {
 		String contents = "Input Legend\r\n";
 		contents += Arrays.toString(this.getInputLegend()) + "\r\n\r\n";
 		contents += "Inputs\r\n";
 		contents += this.stringTrialInputs() + "\r\n\r\n";
-		
+
 		return contents;
 	}
-	
+
 	public static String readFile(String directory, String fileName) {
-		  String file = "";
-		  BufferedReader objReader = null;
-		  try {
-			  String strCurrentLine;
-			  objReader = new BufferedReader(new FileReader(directory + "/" + fileName));
+		String file = "";
+		BufferedReader objReader = null;
+		try {
+			String strCurrentLine;
+			objReader = new BufferedReader(new FileReader(directory + "/" + fileName));
 
-			  while ((strCurrentLine = objReader.readLine()) != null) {
+			while ((strCurrentLine = objReader.readLine()) != null) {
 
-				  file += strCurrentLine + "\r\n";
-			  }
-			  
-		  } catch (IOException e) {
+				file += strCurrentLine + "\r\n";
+			}
 
-			  e.printStackTrace();
+		} catch (IOException e) {
 
-		  } finally {
+			e.printStackTrace();
 
-			  try {
-				  if (objReader != null)
-					  objReader.close();
-			  } catch (IOException ex) {
-				  ex.printStackTrace();
-			  }
-		  }
-		  return file;
-		  
-	  }
+		} finally {
+
+			try {
+				if (objReader != null)
+					objReader.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+		return file;
+
+	}
 }
 
 

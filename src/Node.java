@@ -6,7 +6,21 @@ public class Node {
 	ArrayList<Double> inputs;
 	private double[] weights;
 	double output;
+	
 
+	// Constructors
+	public Node(double[] weigh) {
+		this.weights = weigh;
+	}
+
+	public Node(int numWeights) { // from scratch, random weights
+		this.weights = Node.makeWeightsFromScratch(numWeights);
+	}
+
+	public Node(Node node) {
+		this.setWeights(node.getWeights());
+	}
+	
 	// getters and setters
 	public void setInputs(ArrayList<Double> inpu) {
 		if (inpu.size() != this.weights.length - 1) {
@@ -146,19 +160,7 @@ public class Node {
 		return weights;
 	}
 
-	// Constructors
 
-	public Node(double[] weigh) {
-		this.weights = weigh;
-	}
-
-	public Node(int numWeights) { // from scratch, random weights
-		this.weights = Node.makeWeightsFromScratch(numWeights);
-	}
-
-	public Node(Node node) {
-		this.setWeights(node.getWeights());
-	}
 }
 
 

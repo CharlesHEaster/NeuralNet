@@ -61,45 +61,47 @@ public class Network implements Comparable<Network>{
 			createNodes(netStructure, numUniqueInputs, numHistoryInputs, inputHistoryStructure);
 			this.checkNetStructure();
 		}
-	
+
 	//utilities
 	private void createNodes(int[] structure) {
 		this.nodes = new ArrayList<ArrayList<Node>>();
 		for (int i = 0; i < structure.length; i++) {
-			ArrayList<Node> temp = new ArrayList<Node>();
+			ArrayList<Node> currentLayer = new ArrayList<Node>();
 			for (int j = 0; j < structure[i]; j++) {
 				if (i == 0) {
-					temp.add(new InputNode());
+					currentLayer.add(new InputNode());
 				} else if (i == structure.length - 1){
-					temp.add(new OutputNode(structure[i - 1]));
+					currentLayer.add(new OutputNode(structure[i - 1]));
 				} else {
-					temp.add(new Node(structure[i - 1]));
+					currentLayer.add(new Node(structure[i - 1]));
 				}
 			}
-			this.nodes.add(temp);
+			this.nodes.add(currentLayer);
 		}
 		this.checkNetStructure();
 	}
 	private void createNodes(int[] netStructure, int numUniqueInputs, int numHistoryInputs, int[] inputHistoryStructure) {
 		this.nodes = new ArrayList<ArrayList<Node>>();
-		for (int i = 0; i < structure.length; i++) {
+		for (int i = 0; i < structure.length; i++) {  
 			ArrayList<Node> currentLayer = new ArrayList<Node>();
-			if (i == 0) {
-				for (int j = 0; j < numHistoryInputs; j++) {
-					for (int k = 0; k < inputHistoryStructure.length; k++) {
-						currentLayer.add(new InputNode(inputHistoryStructure[k]));
+			if (i == 0) { 
+				for (int j = 0; j < numHistoryInputs; j++) { 
+					for (int k = 0; k < inputHistoryStructure.length; k++) { 
+						currentLayer.add(new InputNode(j, inputHistoryStructure[k]));
 					}
 				}
 				for (int j = numHistoryInputs; j < numUniqueInputs; j++) {
-					currentLayer.add(new InputNode());
+					currentLayer.add(new InputNode(j, -1));
 				}
 			} else if ( i == structure.length - 1) {
 				for (int j = 0; j < structure[i]; j++){
-					currentLayer.add(new OutputNode(structure[i - 1]));
+					int lastLayerSize = this.nodes.get(this.nodes.size() - 1).size();
+					currentLayer.add(new OutputNode(lastLayerSize));
 				}
 			} else {
 				for (int j = 0; j < structure[i]; j++){
-					currentLayer.add(new Node(structure[i - 1]));
+					int lastLayerSize = this.nodes.get(this.nodes.size() - 1).size();
+					currentLayer.add(new Node(lastLayerSize));
 				}
 			}
 
@@ -127,14 +129,18 @@ public class Network implements Comparable<Network>{
 	//6. add that ArrayList to double ArrayList of all node outputs for the network
 	//7. repeat until all nodes are used.  Last column of outputs is network output.
 		this.outputs.clear();
-		for (int i = 0; i < nodes.size(); i++) {
+		for (int i = 0; i < nodes.size(); i++) {	//for each layer i
 			ArrayList<Double> nextOutput = new ArrayList<Double>();
-			for (int j = 0; j < nodes.get(i).size(); j++) {
+			for (int j = 0; j < nodes.get(i).size(); j++) { // for each node in layer j
 				Node n = nodes.get(i).get(j);
-				if (nodes.get(i).get(j) instanceof InputNode ) {
-					((InputNode) n).setInput(inputs.get(j));
+				if (n instanceof InputNode) {
+					InputNode nInput = (InputNode)n;
+					if (nInput.getInputIdentifier() != -1) {
+						nInput.setInput(inputs.get(nInput.getInputIdentifier()));
+					} else {
+						nInput.setInput(inputs.get(j));
+					}
 					nextOutput.add(n.calcOutput());
-
 				} else if (n instanceof OutputNode){
 					n.setInputs(this.outputs.get(i - 1));
 					nextOutput.add(n.calcOutput());
@@ -190,7 +196,7 @@ public class Network implements Comparable<Network>{
 				
 			}
 		}
-		str += "\r\n}\r\n\r\n";
+		str += "\r\n" + "}" + "\r\n\r\n";
 		return str;	
 	}
 
