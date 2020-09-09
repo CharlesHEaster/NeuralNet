@@ -6,7 +6,6 @@ public class InputNode extends Node{
 	private Double input;
 	private int histCapasity = -1;
 	private ArrayList<Double> history;
-	private int inputIdentifier = -1;
 	
 	public InputNode() {
 		super(0);
@@ -14,23 +13,21 @@ public class InputNode extends Node{
 		this.max = 0;
 	}
 	
-	public InputNode(int inputIdentifier, int histCapasity) {
+	public InputNode(int histCapasity) {
 		super(0);
 		this.min = 0;
 		this.max = 0;
 		this.histCapasity = histCapasity;
 		this.history = new ArrayList<Double>();
-		this.inputIdentifier = inputIdentifier;
 	}
 	
-	public InputNode(int inputIdentifier, int hist, double bias) {
+	public InputNode(int hist, double bias) {
 		super(0);
 		this.min = 0;
 		this.max = 0;
 		this.histCapasity = hist;
 		this.setBias(bias);
 		this.history = new ArrayList<Double>();
-		this.inputIdentifier = inputIdentifier;
 	}
 	
 	public InputNode(double bias) {
@@ -40,9 +37,6 @@ public class InputNode extends Node{
 		this.setBias(bias);
 	}
 	
-	public int getInputIdentifier() {
-		return this.inputIdentifier;
-	}
 	public double getMin() {
 		return this.min;
 	}
@@ -83,7 +77,7 @@ public class InputNode extends Node{
 				removed = this.history.remove(0);
 			}
 			this.history.add(input);
-			if (removed == this.min || removed == this.max || this.input > this.max || this.input < this.min) {
+			if (removed <= this.min || removed >= this.max || this.input > this.max || this.input < this.min) {
 				this.min = this.history.get(0);
 				this.max = this.min;
 				for (int i = 1; i < this.history.size(); i++) {
