@@ -23,7 +23,22 @@ public class Network implements Comparable<Network>{
 			this.heredity = new ArrayList<Integer>();
 			this.heredity.add(Network.FirstGen);
 			Network.FirstGen++;
-			int children = 0;
+			this.children = 0;
+			this.outputs = new ArrayList<ArrayList<Double>>();
+			ArrayList<Double> out1 = new ArrayList<Double>();
+			outputs.add(out1);
+			this.networkOutput = new ArrayList<Double>();
+			this.checkNetStructure();
+		}
+	
+	public Network(int[] struct, int numUniqueInputs, int numHistoryInputs, int[] inputHistoryStructure) {  //new network, random nodes, first gen
+			createNodes(struct, numUniqueInputs, numHistoryInputs, inputHistoryStructure);
+			this.structure = struct;
+			this.score = 0.0;
+			this.heredity = new ArrayList<Integer>();
+			this.heredity.add(Network.FirstGen);
+			Network.FirstGen++;
+			ithis.children = 0;
 			this.outputs = new ArrayList<ArrayList<Double>>();
 			ArrayList<Double> out1 = new ArrayList<Double>();
 			outputs.add(out1);
@@ -33,13 +48,10 @@ public class Network implements Comparable<Network>{
 
 		public Network(ArrayList<ArrayList<Node>> nodes, ArrayList<Integer> hered) {//new Network, product of a morph
 			this.nodes = nodes;
-			this.structure = new int[this.nodes.size()];
-			for (int i = 0; i < this.nodes.size(); i++) {
-				this.structure[i] = this.nodes.get(i).size();
-			}
+			this.checkNetStructure();
 			this.heredity = hered;
 			this.score = 0.0;
-			int children = 0;
+			this.children = 0;
 			this.outputs = new ArrayList<ArrayList<Double>>();
 			ArrayList<Double> out1 = new ArrayList<Double>();
 			outputs.add(out1);
@@ -53,7 +65,7 @@ public class Network implements Comparable<Network>{
 			this.heredity = new ArrayList<Integer>();
 			this.heredity.add(Network.FirstGen);
 			Network.FirstGen++;
-			int children = 0;
+			this.children = 0;
 			this.outputs = new ArrayList<ArrayList<Double>>();
 			ArrayList<Double> out1 = new ArrayList<Double>();
 			outputs.add(out1);
@@ -80,6 +92,7 @@ public class Network implements Comparable<Network>{
 		}
 		this.checkNetStructure();
 	}
+	
 	private void createNodes(int[] netStructure, int numUniqueInputs, int numHistoryInputs, int[] inputHistoryStructure) {
 		this.nodes = new ArrayList<ArrayList<Node>>();
 		for (int i = 0; i < structure.length; i++) {  
