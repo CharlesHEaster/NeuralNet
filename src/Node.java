@@ -137,12 +137,12 @@ public class Node {
 		return this.output;
 	}
 
-	public Node morph() {
+	public Node morph(Double evolveRate, Double learnRate) {
 		double[] newWeights = new double[this.weights.length];
 		for (int i = 0; i < this.weights.length; i++) {
-			if (Math.random() > .7) { //3 in 10 nodes will be randomly adjusted
-				double rando = (Math.random() - 0.5) * 0.4; //they will be randomly adjusted by range(-0.2 -> +0.2)
-				newWeights[i] = this.weights[i] + rando;
+			if (Math.random() < evolveRate) { 
+				learnRate = Math.random() < 0.5 ? learnRate * -1 : learnRate;
+				newWeights[i] = this.weights[i] + learnRate;
 				newWeights[i] = newWeights[i] > 1 ? 1 : newWeights[i];
 				newWeights[i] = newWeights[i] < -1 ? -1 : newWeights[i];
 			} else {

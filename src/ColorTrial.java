@@ -12,7 +12,7 @@ public class ColorTrial extends Trial {
 	}
 	
 	public ColorTrial(int numNetworks, int numCycles, int[] netStructure, int numColors, int numUniqueInputs, int numHistoryInpu, int[] inputHistoryStrut) {
-		super(numNetworks, numCycles, netStructure, new ArrayList<ArrayList<Double>>(), new String[] {}, numUniqueInputs, numHistoryInpu, inputHistoryStrut);
+		super(numNetworks, numCycles, netStructure, new ArrayList<ArrayList<Double>>(), new String[] {}, numHistoryInpu, inputHistoryStrut);
 		this.setTrialInputs(ColorTrial.makeSomeColors(numColors));
 		this.setInputLegend(new String[] {"Red", "Green", "Blue"});
 		this.setDir("ColorTrialResults");

@@ -11,108 +11,88 @@ public class Network implements Comparable<Network>{
 	private ArrayList<Double> networkOutput;
 	private int[] structure;
 	// Network State variables for some future iteration
-//	private double[] stateVar; 
-//	private String[] stateString;
+	//	private double[] stateVar; 
+	//	private String[] stateString;
 	private static int FirstGen; // Static in Network assumes only one group of networks at a time, which is true
 
 	//constructors
-		public Network(int[] struct) {  //new network, random nodes, first gen
-			createNodes(struct);
-			this.structure = struct;
-			this.score = 0.0;
-			this.heredity = new ArrayList<Integer>();
-			this.heredity.add(Network.FirstGen);
-			Network.FirstGen++;
-			this.children = 0;
-			this.outputs = new ArrayList<ArrayList<Double>>();
-			ArrayList<Double> out1 = new ArrayList<Double>();
-			outputs.add(out1);
-			this.networkOutput = new ArrayList<Double>();
-			this.checkNetStructure();
-		}
-	
-	public Network(int[] struct, int numUniqueInputs, int numHistoryInputs, int[] inputHistoryStructure) {  //new network, random nodes, first gen
-			createNodes(struct, numUniqueInputs, numHistoryInputs, inputHistoryStructure);
-			this.structure = struct;
-			this.score = 0.0;
-			this.heredity = new ArrayList<Integer>();
-			this.heredity.add(Network.FirstGen);
-			Network.FirstGen++;
-			ithis.children = 0;
-			this.outputs = new ArrayList<ArrayList<Double>>();
-			ArrayList<Double> out1 = new ArrayList<Double>();
-			outputs.add(out1);
-			this.networkOutput = new ArrayList<Double>();
-			this.checkNetStructure();
-		}
+	public Network(int[] struct) {  //new network, random nodes, first gen
+		this.structure = struct;
+		createNodes(struct);
+		this.score = 0.0;
+		this.heredity = new ArrayList<Integer>();
+		this.heredity.add(Network.FirstGen);
+		Network.FirstGen++;
+		this.children = 0;
+		this.outputs = new ArrayList<ArrayList<Double>>();
+		this.networkOutput = new ArrayList<Double>();
+		this.checkNetStructure();
+	}
 
-		public Network(ArrayList<ArrayList<Node>> nodes, ArrayList<Integer> hered) {//new Network, product of a morph
-			this.nodes = nodes;
-			this.checkNetStructure();
-			this.heredity = hered;
-			this.score = 0.0;
-			this.children = 0;
-			this.outputs = new ArrayList<ArrayList<Double>>();
-			ArrayList<Double> out1 = new ArrayList<Double>();
-			outputs.add(out1);
-			this.networkOutput = new ArrayList<Double>();
-			this.checkNetStructure();
-		   }
-		
-		public Network(int[] netStructure, int numUniqueInputs, int numHistoryInputs, int[] inputHistoryStructure) {
-			this.structure = netStructure;
-			this.score = 0.0;
-			this.heredity = new ArrayList<Integer>();
-			this.heredity.add(Network.FirstGen);
-			Network.FirstGen++;
-			this.children = 0;
-			this.outputs = new ArrayList<ArrayList<Double>>();
-			ArrayList<Double> out1 = new ArrayList<Double>();
-			outputs.add(out1);
-			this.networkOutput = new ArrayList<Double>();
-			createNodes(netStructure, numUniqueInputs, numHistoryInputs, inputHistoryStructure);
-			this.checkNetStructure();
-		}
+	public Network(int[] struct, int numHistoryInputs, int[] inputHistoryStructure) {  //new network, random nodes, first gen
+		this.structure = struct;	
+		createNodes(struct, numHistoryInputs, inputHistoryStructure);
+		this.score = 0.0;
+		this.heredity = new ArrayList<Integer>();
+		this.heredity.add(Network.FirstGen);
+		Network.FirstGen++;
+		this.children = 0;
+		this.outputs = new ArrayList<ArrayList<Double>>();
+		this.networkOutput = new ArrayList<Double>();
+		this.checkNetStructure();
+	}
+
+	public Network(ArrayList<ArrayList<Node>> nodes, ArrayList<Integer> hered) {//new Network, product of a morph
+		this.nodes = nodes;
+		this.checkNetStructure();
+		this.heredity = hered;
+		this.score = 0.0;
+		this.children = 0;
+		this.outputs = new ArrayList<ArrayList<Double>>();
+		this.networkOutput = new ArrayList<Double>();
+		this.checkNetStructure();
+	}
+
 
 	//utilities
-	private void createNodes(int[] structure) {
+	private void createNodes(int[] netStructure) {
 		this.nodes = new ArrayList<ArrayList<Node>>();
-		for (int i = 0; i < structure.length; i++) {
+		for (int i = 0; i < netStructure.length; i++) {
 			ArrayList<Node> currentLayer = new ArrayList<Node>();
-			for (int j = 0; j < structure[i]; j++) {
+			for (int j = 0; j < netStructure[i]; j++) {
 				if (i == 0) {
 					currentLayer.add(new InputNode());
-				} else if (i == structure.length - 1){
-					currentLayer.add(new OutputNode(structure[i - 1]));
+				} else if (i == netStructure.length - 1){
+					currentLayer.add(new OutputNode(netStructure[i - 1]));
 				} else {
-					currentLayer.add(new Node(structure[i - 1]));
+					currentLayer.add(new Node(netStructure[i - 1]));
 				}
 			}
 			this.nodes.add(currentLayer);
 		}
 		this.checkNetStructure();
 	}
-	
-	private void createNodes(int[] netStructure, int numUniqueInputs, int numHistoryInputs, int[] inputHistoryStructure) {
+
+	private void createNodes(int[] netStructure, int numHistoryInputs, int[] inputHistoryStructure) {
 		this.nodes = new ArrayList<ArrayList<Node>>();
-		for (int i = 0; i < structure.length; i++) {  
+		for (int i = 0; i < netStructure.length; i++) {  
 			ArrayList<Node> currentLayer = new ArrayList<Node>();
 			if (i == 0) { 
 				for (int j = 0; j < numHistoryInputs; j++) { 
 					for (int k = 0; k < inputHistoryStructure.length; k++) { 
-						currentLayer.add(new InputNode(j, inputHistoryStructure[k]));
+						currentLayer.add(new InputNode(inputHistoryStructure[k]));
 					}
 				}
-				for (int j = numHistoryInputs; j < numUniqueInputs; j++) {
-					currentLayer.add(new InputNode(j, -1));
+				for (int j = numHistoryInputs; j < this.structure[0]; j++) {
+					currentLayer.add(new InputNode());
 				}
-			} else if ( i == structure.length - 1) {
-				for (int j = 0; j < structure[i]; j++){
+			} else if ( i == netStructure.length - 1) {
+				for (int j = 0; j < netStructure[i]; j++){
 					int lastLayerSize = this.nodes.get(this.nodes.size() - 1).size();
 					currentLayer.add(new OutputNode(lastLayerSize));
 				}
 			} else {
-				for (int j = 0; j < structure[i]; j++){
+				for (int j = 0; j < netStructure[i]; j++){
 					int lastLayerSize = this.nodes.get(this.nodes.size() - 1).size();
 					currentLayer.add(new Node(lastLayerSize));
 				}
@@ -122,7 +102,7 @@ public class Network implements Comparable<Network>{
 		}
 		this.checkNetStructure();
 	}
-	
+
 	public int[] checkNetStructure() {
 		int[] netStructure = new int[this.nodes.size()];
 		for (int i = 0; i < this.nodes.size(); i++) {
@@ -131,16 +111,16 @@ public class Network implements Comparable<Network>{
 		this.structure = netStructure;
 		return netStructure;
 	}
-	
+
 	public ArrayList<Double> run(ArrayList<Double> inputs) {
-	//1. Iterate through levels (columns) of nodes.
-	//2. Iterate through individual nodes (step down each column)
-	//3. if first column of nodes (hence input nodes), input only the corresponding input from "inputs"
-	//  3b. else input all of the previous outputs as inputs
-	//4. calculate output
-	//5. add it to the ArrayList for the next group of outputs
-	//6. add that ArrayList to double ArrayList of all node outputs for the network
-	//7. repeat until all nodes are used.  Last column of outputs is network output.
+		//1. Iterate through levels (columns) of nodes.
+		//2. Iterate through individual nodes (step down each column)
+		//3. if first column of nodes (hence input nodes), input only the corresponding input from "inputs"
+		//  3b. else input all of the previous outputs as inputs
+		//4. calculate output
+		//5. add it to the ArrayList for the next group of outputs
+		//6. add that ArrayList to double ArrayList of all node outputs for the network
+		//7. repeat until all nodes are used.  Last column of outputs is network output.
 		this.outputs.clear();
 		for (int i = 0; i < nodes.size(); i++) {	//for each layer i
 			ArrayList<Double> nextOutput = new ArrayList<Double>();
@@ -148,11 +128,9 @@ public class Network implements Comparable<Network>{
 				Node n = nodes.get(i).get(j);
 				if (n instanceof InputNode) {
 					InputNode nInput = (InputNode)n;
-					if (nInput.getInputIdentifier() != -1) {
-						nInput.setInput(inputs.get(nInput.getInputIdentifier()));
-					} else {
-						nInput.setInput(inputs.get(j));
-					}
+					System.out.println(inputs.toString());
+					System.out.println("1");
+					nInput.setInput(inputs.get(j));
 					nextOutput.add(n.calcOutput());
 				} else if (n instanceof OutputNode){
 					n.setInputs(this.outputs.get(i - 1));
@@ -167,17 +145,17 @@ public class Network implements Comparable<Network>{
 		this.networkOutput = this.outputs.get(this.outputs.size() - 1);
 		return this.networkOutput;
 	}
-	
+
 	public void resetOutputs() {
 		this.outputs = new ArrayList<ArrayList<Double>>();
 	}
-	
+
 	public void clearInputHistories() {
 		for (int i = 0; i < nodes.get(0).size(); i++) {
 			((InputNode) nodes.get(0).get(i)).clearHistory();
 		}
 	}
-	
+
 	public String toString() {
 		this.checkNetStructure();
 		String str = "Network {\r\n Heredity ";
@@ -206,7 +184,7 @@ public class Network implements Comparable<Network>{
 						str += "\r\n      "; 
 					} 
 				}
-				
+
 			}
 		}
 		str += "\r\n" + "}" + "\r\n\r\n";
@@ -240,61 +218,61 @@ public class Network implements Comparable<Network>{
 	public Node getNode(int col, int colnum) {
 		return this.nodes.get(col).get(colnum);
 	}
-	
+
 	public int[] getStructure() {
 		this.checkNetStructure();
 		return this.structure;
 	}
-	
+
 	public ArrayList<Double> getNetworkOutput() {
 		return this.networkOutput;
 	}
 
 	//Network State variables for some future iteration
-//	public double getStateVar(int i) {
-//		return this.stateVar[i];
-//	}
-//
-//	public void setStateVar(int i, double var){
-//		this.stateVar[i] = var;
-//	}
-//
-//	public double[ ] getStateVar() {
-//		return this.stateVar;
-//	}
-//
-//	public void setStateVar(double[ ] var){
-//		this.stateVar = var;
-//	}
-//
-//	public void resetStateVar(){
-//		for(int i =0; i < this.stateVar.length; i++){
-//			this.stateVar[i] = 0;
-//		}
-//	}
-//
-//	public String getStateString(int i) {
-//		return this.stateString[i];
-//	}
-//
-//	public void setStateString(int i, String str){
-//		this.stateString[i] = str;
-//	}
-//
-//	public String[ ] getStateString() {
-//		return this.stateString;
-//	}
-//
-//	public void setStateString(String[ ] str){
-//		this.stateString = str;
-//	} 
+	//	public double getStateVar(int i) {
+	//		return this.stateVar[i];
+	//	}
+	//
+	//	public void setStateVar(int i, double var){
+	//		this.stateVar[i] = var;
+	//	}
+	//
+	//	public double[ ] getStateVar() {
+	//		return this.stateVar;
+	//	}
+	//
+	//	public void setStateVar(double[ ] var){
+	//		this.stateVar = var;
+	//	}
+	//
+	//	public void resetStateVar(){
+	//		for(int i =0; i < this.stateVar.length; i++){
+	//			this.stateVar[i] = 0;
+	//		}
+	//	}
+	//
+	//	public String getStateString(int i) {
+	//		return this.stateString[i];
+	//	}
+	//
+	//	public void setStateString(int i, String str){
+	//		this.stateString[i] = str;
+	//	}
+	//
+	//	public String[ ] getStateString() {
+	//		return this.stateString;
+	//	}
+	//
+	//	public void setStateString(String[ ] str){
+	//		this.stateString = str;
+	//	} 
 
-	public Network morph(){
+	public Network morph(Double evolveRate, Double learnRate){
 		ArrayList<ArrayList<Node>> newNodes = new ArrayList<ArrayList<Node>>();
 		for (int i = 0; i < this.nodes.size(); i++){
 			ArrayList<Node> temp = new ArrayList<Node>();
 			for (int j = 0; j < this.nodes.get(i).size(); j++){
-				temp.add(this.nodes.get(i).get(j).morph());
+				temp.add(this.nodes.get(i).get(j).morph(evolveRate, learnRate));
 			}
 			newNodes.add(temp);
 		}

@@ -14,7 +14,7 @@ public abstract class Trial {
 
 
 	private ArrayList<Network> networks, theBest;
-	private int cycles, numNetworks, numDead, numUniqueInputs, numHistoryInputs;
+	private int cycles, numNetworks, numDead, numHistoryInputs;
 	private int[] netStructure, inputHistoryStructure;
 	private ArrayList<ArrayList<Double>> TrialInputs;
 	private boolean fillTheMorgue$;
@@ -22,6 +22,7 @@ public abstract class Trial {
 	private long Start, Elapsed;
 	private String workingMorgueFile = "";
 	private String dir, FileName;
+	private Double evolveRate, learnRate;
 
 	//constructors
 	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend){
@@ -37,32 +38,55 @@ public abstract class Trial {
 		this.cycles = numCycles;
 
 		this.fillTheMorgue$ = false;
+		this.evolveRate = 0.3;
+		this.learnRate = 0.2;
 	}
 
-	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend, int numUniqueInputs, int numHistoryInpu, int[] inputHistoryStrut){
+	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend, int numHistoryInputs, int[] inputHistoryStrut){
 		this(numNetworks, numCycles, netStructure, trialInputs, inputLegend);
-		this.numUniqueInputs = numUniqueInputs;
-		this.numHistoryInputs = numHistoryInpu;
+		this.numHistoryInputs = numHistoryInputs;
 		this.inputHistoryStructure = inputHistoryStrut;
 		this.TrialInputs = new ArrayList<ArrayList<Double>>();
-		for (int k = 0; k < trialInputs.size(); k++){
-			ArrayList<Double> setOfInputs = new ArrayList<Double>();
-			for (int i = 0; i < this.numHistoryInputs; i++){
-				for (int j = 0; j < this.inputHistoryStructure.length; j++){
-					setOfInputs.add(trialInputs.get(k).get(i));
+		for (int i = 0; i < trialInputs.size(); i++){
+			ArrayList<Double> oldInputs = trialInputs.get(i);
+			ArrayList<Double> expandedInputs = new ArrayList<Double>();
+			for (int j = 0; j < trialInputs.get(i).size(); j++) {
+				if (j < this.numHistoryInputs) {
+					for (int k = 0; k < this.inputHistoryStructure.length; k++)
+						expandedInputs.add(oldInputs.get(j));
+				}
+				if (j <= this.numHistoryInputs) {
+					expandedInputs.add(oldInputs.get(j));
 				}
 			}
-			for (int i = this.numHistoryInputs; i < trialInputs.size(); i ++){
-				setOfInputs.add(trialInputs.get(k).get(i));	
-			}
-			this.TrialInputs.add(setOfInputs);
+			this.TrialInputs.add(expandedInputs);		
 		}
 		this.networks = new ArrayList<Network>();
 		for (int i = 0; i < numNetworks; i++) {
-			this.networks.add(new Network(this.netStructure, this.numUniqueInputs, this.numHistoryInputs, this.inputHistoryStructure));
+			this.networks.add(new Network(this.netStructure, this.numHistoryInputs, this.inputHistoryStructure));
 		}
 	}
 
+	public void setEvolveRate(Double evolveRate) {
+		this.evolveRate = evolveRate;
+		this.evolveRate = this.evolveRate > 1 ? 1 : this.evolveRate;
+		this.evolveRate = this.evolveRate < 0 ? 0 : this.evolveRate;
+	}
+
+	public Double getEvolveRate() {
+		return this.evolveRate;
+	}
+	
+	public void setLearnRate(Double learnRate) {
+		this.learnRate = learnRate;
+		this.learnRate = this.learnRate > 2 ? 2 : this.learnRate;
+		this.learnRate = this.learnRate < 0 ? 0 : this.learnRate;
+	}
+
+	public Double getLearnRate() {
+		return this.learnRate;
+	}
+	
 	public int[] getHistStructure() {
 		return this.inputHistoryStructure;
 	}
@@ -207,18 +231,19 @@ public abstract class Trial {
 		for (int i = 0; i < this.theBest.size(); i++) { // roll through those top 20%
 			if (i < top1) {	
 				for (int j = 0; j < 10; j++) {			// top 0% - 1% get 10 children
-					this.networks.add(this.theBest.get(i).morph());
+					this.networks.add(this.theBest.get(i).morph(this.evolveRate, this.learnRate));
 				}
 			} else if (i < top10) {
 				for (int j = 0; j < 5; j++) {			// top 1% - 10% get 5 children
-					this.networks.add(this.theBest.get(i).morph());
+					this.networks.add(this.theBest.get(i).morph(this.evolveRate, this.learnRate));
 				}
 			} else {									// top 10% - 20% get 2 children
-				this.networks.add(this.theBest.get(i).morph());
-				this.networks.add(this.theBest.get(i).morph());
+				this.networks.add(this.theBest.get(i).morph(this.evolveRate, this.learnRate));
+				this.networks.add(this.theBest.get(i).morph(this.evolveRate, this.learnRate));
 			}			
 		}
-		while (this.networks.size() < numNetworks) {	//fill in the rest of the networks with random 1stGen.  
+		while (this.networks.size() < numNetworks) {	//fill in the rest of the networks with random 1stGen. 
+			//TODO make a networks.add for historyInputs
 			this.networks.add(new Network(this.netStructure));
 		}
 		System.out.print(" Score: " + this.theBest.get(0).getScore() + "\r\n");

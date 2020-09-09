@@ -98,10 +98,11 @@ public class InputNode extends Node{
 	}
 	
 	@Override
-	public Node morph() {
+	public Node morph(Double evolveRate, Double learnRate) {
 		double newBias = this.getBias();
-		if (Math.random() > 0.7) {
-			newBias += (Math.random() - 0.5) * 0.4;
+		if (Math.random() < evolveRate) {
+			learnRate = Math.random() < 0.5 ? learnRate * -1 : learnRate;
+			newBias += learnRate;
 			newBias = newBias > 1 ? 1 : newBias;
 			newBias = newBias < -1 ? -1 : newBias;
 		}

@@ -42,16 +42,16 @@ public class OutputNode extends Node{
 	}
 	
 	@Override
-	public Node morph() {
+	public Node morph(Double evolveRate, Double learnRate) {
 		double[] newWeights = new double[this.getWeights().length];
 		for (int i = 0; i < this.getWeights().length; i++) {
-			if (Math.random() > .7) { //3 in 10 nodes will be randomly adjusted
-				double rando = (Math.random() - 0.5) * 0.4; //they will be randomly adjusted by range(-0.2 -> +0.2)
-				newWeights[i] = this.getWeight(i) + rando;
-				newWeights[i] = newWeights[i] > 1 ? 1 : newWeights[i]; //check new weight is not more than 1
-				newWeights[i] = newWeights[i] < -1 ? -1 : newWeights[i];  //check new weight is not less than -1
+			if (Math.random() < evolveRate) { 
+				learnRate = Math.random() < 0.5 ? learnRate * -1 : learnRate;
+				newWeights[i] = this.getWeight(i) + learnRate;
+				newWeights[i] = newWeights[i] > 1 ? 1 : newWeights[i]; 
+				newWeights[i] = newWeights[i] < -1 ? -1 : newWeights[i];  
 			} else {
-				newWeights[i] = this.getWeights()[i]; // 7 in 10 nodes will be left as is
+				newWeights[i] = this.getWeights()[i]; 
 			}
 		}
 		return new OutputNode(newWeights);
