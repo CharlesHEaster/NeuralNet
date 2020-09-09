@@ -105,6 +105,6 @@ public class InputNode extends Node{
 			newBias = newBias > 1 ? 1 : newBias;
 			newBias = newBias < -1 ? -1 : newBias;
 		}
-		return new InputNode(this.inputIdentifier, this.histCapasity, newBias);
+		return new InputNode(this.histCapasity, newBias);
 	}
 }
