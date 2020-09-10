@@ -128,8 +128,6 @@ public class Network implements Comparable<Network>{
 				Node n = nodes.get(i).get(j);
 				if (n instanceof InputNode) {
 					InputNode nInput = (InputNode)n;
-					System.out.println(inputs.toString());
-					System.out.println("1");
 					nInput.setInput(inputs.get(j));
 					nextOutput.add(n.calcOutput());
 				} else if (n instanceof OutputNode){

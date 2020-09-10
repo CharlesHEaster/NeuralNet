@@ -31,12 +31,8 @@ public abstract class Trial {
 		this.networks = new ArrayList<Network>();
 		this.numNetworks = numNetworks;
 		this.netStructure = netStructure;
-		for (int i = 0; i < numNetworks; i++) {
-			this.networks.add(new Network(this.netStructure));
-		}
 		this.theBest = new ArrayList<Network>();
 		this.cycles = numCycles;
-
 		this.fillTheMorgue$ = false;
 		this.evolveRate = 0.3;
 		this.learnRate = 0.2;
@@ -47,24 +43,9 @@ public abstract class Trial {
 		this.numHistoryInputs = numHistoryInputs;
 		this.inputHistoryStructure = inputHistoryStrut;
 		this.TrialInputs = new ArrayList<ArrayList<Double>>();
-		for (int i = 0; i < trialInputs.size(); i++){
-			ArrayList<Double> oldInputs = trialInputs.get(i);
-			ArrayList<Double> expandedInputs = new ArrayList<Double>();
-			for (int j = 0; j < trialInputs.get(i).size(); j++) {
-				if (j < this.numHistoryInputs) {
-					for (int k = 0; k < this.inputHistoryStructure.length; k++)
-						expandedInputs.add(oldInputs.get(j));
-				}
-				if (j <= this.numHistoryInputs) {
-					expandedInputs.add(oldInputs.get(j));
-				}
-			}
-			this.TrialInputs.add(expandedInputs);		
-		}
+		this.expandInputs();
 		this.networks = new ArrayList<Network>();
-		for (int i = 0; i < numNetworks; i++) {
-			this.networks.add(new Network(this.netStructure, this.numHistoryInputs, this.inputHistoryStructure));
-		}
+		
 	}
 
 	public void setEvolveRate(Double evolveRate) {
@@ -73,6 +54,18 @@ public abstract class Trial {
 		this.evolveRate = this.evolveRate < 0 ? 0 : this.evolveRate;
 	}
 
+	public void createNetworks() {
+		if (this.numHistoryInputs == 0) {
+			for (int i = 0; i < numNetworks; i++) {
+				this.networks.add(new Network(this.netStructure));
+			}		
+		} else {
+			for (int i = 0; i < numNetworks; i++) {
+				this.networks.add(new Network(this.netStructure, this.numHistoryInputs, this.inputHistoryStructure));
+			}
+		}
+	}
+	
 	public Double getEvolveRate() {
 		return this.evolveRate;
 	}
@@ -182,7 +175,10 @@ public abstract class Trial {
 
 
 	public void run() {
-
+		
+		this.checkInputsExpanded();
+		this.createNetworks();
+		System.out.println("Expanded Inputs: " + this.TrialInputs.toString());
 		this.Start = System.nanoTime();
 		for(int i = 0; i < this.cycles; i++) {
 			System.out.print("Cycle: " + i + "/" + this.cycles + " :: ");
@@ -211,6 +207,33 @@ public abstract class Trial {
 		}
 	}										
 
+	public void checkInputsExpanded() {
+		if (this.numHistoryInputs > 0 && 
+				this.TrialInputs.get(0).get(0) != this.TrialInputs.get(0).get(1)) {
+			this.expandInputs();
+			
+		}
+	}
+	
+	public void expandInputs() {
+		ArrayList<ArrayList<Double>> trialInputs = new ArrayList<ArrayList<Double>>(this.TrialInputs);
+		this.TrialInputs.clear();
+		for (int i = 0; i < trialInputs.size(); i++){ //for each set of inputs
+			ArrayList<Double> oldInputs = trialInputs.get(i);
+			ArrayList<Double> expandedInputs = new ArrayList<Double>();
+			for (int j = 0; j < trialInputs.get(i).size(); j++) { //for each input in a set
+				if (j < this.numHistoryInputs) {
+					for (int k = 0; k < this.inputHistoryStructure.length; k++)
+						expandedInputs.add(oldInputs.get(j));
+				}
+				if (j >= this.numHistoryInputs) {
+					expandedInputs.add(oldInputs.get(j));
+				}
+			}
+			this.TrialInputs.add(expandedInputs);		
+		}
+	}
+	
 	public void compare(){
 		this.networks.addAll(this.theBest);
 		Collections.sort(this.networks, Collections.reverseOrder());
