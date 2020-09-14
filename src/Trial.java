@@ -178,7 +178,6 @@ public abstract class Trial {
 		
 		this.checkInputsExpanded();
 		this.createNetworks();
-		System.out.println("Expanded Inputs: " + this.TrialInputs.toString());
 		this.Start = System.nanoTime();
 		for(int i = 0; i < this.cycles; i++) {
 			System.out.print("Cycle: " + i + "/" + this.cycles + " :: ");
@@ -186,7 +185,7 @@ public abstract class Trial {
 		}
 		this.Elapsed = System.nanoTime() - this.Start;
 		System.out.println("--Compiling and Publishing Results--");
-		this.printTrialResults();
+		//this.printTrialResults();
 		System.out.println(":::::::::Training Program Complete:::::::::");
 	}
 

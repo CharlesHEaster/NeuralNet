@@ -4,12 +4,12 @@ public class Node {
 
 
 	ArrayList<Double> inputs;
-	private double[] weights;
-	double output;
+	private Double[] weights;
+	Double output;
 	
 
 	// Constructors
-	public Node(double[] weigh) {
+	public Node(Double[] weigh) {
 		this.weights = weigh;
 	}
 
@@ -37,19 +37,19 @@ public class Node {
 		return this.inputs;
 	}
 
-	public void setWeights(double[] weig) {
+	public void setWeights(Double[] weig) {
 		this.weights = weig;
 	}
 
-	public double[] getWeights() {
+	public Double[] getWeights() {
 		return this.weights;
 	}
 
-	public double getWeight(int i) {
+	public Double getWeight(int i) {
 		return this.weights[i];
 	}
 	
-	public double getBias() {
+	public Double getBias() {
 		if (this instanceof OutputNode) {
 			System.out.println("Error 3418: Tried to retrieve Bias of an Output Node");
 			return 0.0;
@@ -59,7 +59,7 @@ public class Node {
 	}
 
 	
-	public void setBias(double bias) {
+	public void setBias(Double bias) {
 		if (this instanceof OutputNode) {
 			System.out.println("Error 3419: Tried to assgn Bias to an Output Node");
 		} else if (this instanceof InputNode) {
@@ -71,11 +71,11 @@ public class Node {
 		}
 	}
 
-	public double getOutput() {
+	public Double getOutput() {
 		return this.output;
 	}
 	
-	public void setOutput(double out) {
+	public void setOutput(Double out) {
 		this.output = out;
 	}
 
@@ -91,14 +91,14 @@ public class Node {
 
 	public String toStringDetail() { 
 		String str = "Weights [";
-		for ( double weight: this.weights){
+		for ( Double weight: this.weights){
 			str += weight + ", ";
 		}
 		str = str.substring(0, str.length() - 2) + "]";
 
 		if (this.inputs != null) {
 			str += "\nInputs [";
-			for( double input: this.inputs){
+			for( Double input: this.inputs){
 				str += input + ", ";
 			}
 			str = str.substring(0, str.length() - 2) + "]";
@@ -110,14 +110,14 @@ public class Node {
 	
 	public String toStringBasic() { 
 		String str = "[";
-		for (double weight: this.weights){
+		for (Double weight: this.weights){
 			str += String.format("%.3f, ", weight);
 		}
 		str = str.substring(0, str.length() - 2) + "]";
 
 		if (this.inputs != null) {
 			str += "\nInputs [";
-			for( double input: this.inputs){
+			for( Double input: this.inputs){
 				str += String.format("%.3f, ", input);
 			}
 			str = str.substring(0, str.length() - 2) + "]";
@@ -125,9 +125,9 @@ public class Node {
 		return str;
 	}
 	
-	public double calcOutput() {
+	public Double calcOutput() {
 		//Activation function changed from strange "Frankenstein Equation" to tanh().  See note at end of code
-		double rawOutput = 0;
+		Double rawOutput = 0.0;
 		for (int i = 0; i < this.inputs.size(); i++) {
 			rawOutput += this.inputs.get(i) * this.weights[i];
 		}
@@ -138,7 +138,7 @@ public class Node {
 	}
 
 	public Node morph(Double evolveRate, Double learnRate) {
-		double[] newWeights = new double[this.weights.length];
+		Double[] newWeights = new Double[this.weights.length];
 		for (int i = 0; i < this.weights.length; i++) {
 			if (Math.random() < evolveRate) { 
 				learnRate = Math.random() < 0.5 ? learnRate * -1 : learnRate;
@@ -152,8 +152,8 @@ public class Node {
 		return new Node(newWeights);
 	}
 
-	public static double[] makeWeightsFromScratch(int numWeights){ 
-		double[] weights = new double[numWeights + 1];
+	public static Double[] makeWeightsFromScratch(int numWeights){ 
+		Double[] weights = new Double[numWeights + 1];
 		for (int i = 0; i <= numWeights; i++) {
 			weights[i] = (Math.random() * 2) - 1;
 		}

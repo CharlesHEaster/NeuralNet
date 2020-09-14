@@ -11,7 +11,7 @@ public class Network implements Comparable<Network>{
 	private ArrayList<Double> networkOutput;
 	private int[] structure;
 	// Network State variables for some future iteration
-	//	private double[] stateVar; 
+	//	private Double[] stateVar; 
 	//	private String[] stateString;
 	private static int FirstGen; // Static in Network assumes only one group of networks at a time, which is true
 
@@ -119,13 +119,13 @@ public class Network implements Comparable<Network>{
 		//  3b. else input all of the previous outputs as inputs
 		//4. calculate output
 		//5. add it to the ArrayList for the next group of outputs
-		//6. add that ArrayList to double ArrayList of all node outputs for the network
+		//6. add that ArrayList to Double ArrayList of all node outputs for the network
 		//7. repeat until all nodes are used.  Last column of outputs is network output.
 		this.outputs.clear();
 		for (int i = 0; i < nodes.size(); i++) {	//for each layer i
 			ArrayList<Double> nextOutput = new ArrayList<Double>();
 			for (int j = 0; j < nodes.get(i).size(); j++) { // for each node in layer j
-				Node n = nodes.get(i).get(j);
+				Node n = this.nodes.get(i).get(j);
 				if (n instanceof InputNode) {
 					InputNode nInput = (InputNode)n;
 					nInput.setInput(inputs.get(j));
@@ -227,19 +227,19 @@ public class Network implements Comparable<Network>{
 	}
 
 	//Network State variables for some future iteration
-	//	public double getStateVar(int i) {
+	//	public Double getStateVar(int i) {
 	//		return this.stateVar[i];
 	//	}
 	//
-	//	public void setStateVar(int i, double var){
+	//	public void setStateVar(int i, Double var){
 	//		this.stateVar[i] = var;
 	//	}
 	//
-	//	public double[ ] getStateVar() {
+	//	public Double[ ] getStateVar() {
 	//		return this.stateVar;
 	//	}
 	//
-	//	public void setStateVar(double[ ] var){
+	//	public void setStateVar(Double[ ] var){
 	//		this.stateVar = var;
 	//	}
 	//

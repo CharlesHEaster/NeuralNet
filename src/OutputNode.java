@@ -16,7 +16,7 @@ public class OutputNode extends Node{
 		}
 	}
 	
-	public OutputNode(double[] weights) {
+	public OutputNode(Double[] weights) {
 		super(weights);
 	}
 	
@@ -30,12 +30,12 @@ public class OutputNode extends Node{
 	}
 	
 	@Override
-	public double calcOutput() {
-		double rawOutput = 0;
+	public Double calcOutput() {
+		Double rawOutput = 0.0;
 		for (int i = 0; i < this.inputs.size(); i++) {
 			rawOutput += this.inputs.get(i) * this.getWeight(i);
 		}
-		double output = Math.tanh(rawOutput);
+		Double output = Math.tanh(rawOutput);
 		this.setOutput(output);
 
 		return output;
@@ -43,7 +43,7 @@ public class OutputNode extends Node{
 	
 	@Override
 	public Node morph(Double evolveRate, Double learnRate) {
-		double[] newWeights = new double[this.getWeights().length];
+		Double[] newWeights = new Double[this.getWeights().length];
 		for (int i = 0; i < this.getWeights().length; i++) {
 			if (Math.random() < evolveRate) { 
 				learnRate = Math.random() < 0.5 ? learnRate * -1 : learnRate;
@@ -58,7 +58,7 @@ public class OutputNode extends Node{
 	}
 	
 	@Override
-	public void setBias(double nope) {
+	public void setBias(Double nope) {
 		System.out.println("Error 312: Tried to set bias of an OutputNode.  " + nope);
 	}
 }

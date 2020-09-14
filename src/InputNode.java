@@ -1,47 +1,47 @@
 import java.util.ArrayList;
 
 public class InputNode extends Node{
-	private double min;
-	private double max;
+	private Double min;
+	private Double max;
 	private Double input;
 	private int histCapasity = -1;
 	private ArrayList<Double> history;
 	
 	public InputNode() {
 		super(0);
-		this.min = 0;
-		this.max = 0;
+		this.min = 0.0;
+		this.max = 0.0;
 	}
 	
 	public InputNode(int histCapasity) {
 		super(0);
-		this.min = 0;
-		this.max = 0;
+		this.min = 0.0;
+		this.max = 0.0;
 		this.histCapasity = histCapasity;
 		this.history = new ArrayList<Double>();
 	}
 	
-	public InputNode(int hist, double bias) {
+	public InputNode(int hist, Double bias) {
 		super(0);
-		this.min = 0;
-		this.max = 0;
+		this.min = 0.0;
+		this.max = 0.0;
 		this.histCapasity = hist;
 		this.setBias(bias);
 		this.history = new ArrayList<Double>();
 	}
 	
-	public InputNode(double bias) {
+	public InputNode(Double bias) {
 		super(0);
-		this.min = 0;
-		this.max = 0;
+		this.min = 0.0;
+		this.max = 0.0;
 		this.setBias(bias);
 	}
 	
-	public double getMin() {
+	public Double getMin() {
 		return this.min;
 	}
 	
-	public double getMax() {
+	public Double getMax() {
 		return this.max;
 	}
 	
@@ -68,7 +68,7 @@ public class InputNode extends Node{
 			this.max = input + .0000000001;
 		}
 		this.input = input;
-		double removed = 0;
+		Double removed = 0.0;
 		if (this.histCapasity <= 0) {
 			this.min = input < this.min ? input : this.min;
 			this.max = input > this.max ? input : this.max;
@@ -89,17 +89,21 @@ public class InputNode extends Node{
 	}
 
 	@Override
-	public double calcOutput() { 
-		this.output = (this.input - this.min) / (this.max - this.min);
-		this.output = (this.output * 2) - 1;
-		this.output += this.getBias();
+	public Double calcOutput() { 
+		if (this.min == this.max && this.min == this.input) {
+			this.output = this.getBias();
+		} else {
+			this.output = (this.input - this.min) / (this.max - this.min);
+			this.output = (this.output * 2) - 1;
+			this.output += this.getBias();
+		}
 		
 		return this.output;
 	}
 	
 	@Override
 	public Node morph(Double evolveRate, Double learnRate) {
-		double newBias = this.getBias();
+		Double newBias = this.getBias();
 		if (Math.random() < evolveRate) {
 			learnRate = Math.random() < 0.5 ? learnRate * -1 : learnRate;
 			newBias += learnRate;
