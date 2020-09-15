@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ColorTrial extends Trial {
 	
@@ -46,7 +45,10 @@ public class ColorTrial extends Trial {
 
 		//Determine color
 		String answer = "";
-		ArrayList<Double> color = inputColor;
+		ArrayList<Double> color = new ArrayList<Double>(inputColor);
+		if (this.getNumHistoryInputs() != 0) {
+			color = Trial.getUniqueInputs(color);
+		} 
 		if (color.get(0) > color.get(1) && color.get(0) > color.get(2)) {
 			answer = "Red";
 		}
@@ -56,6 +58,7 @@ public class ColorTrial extends Trial {
 		if (color.get(2) > color.get(1) && color.get(2) > color.get(0)) {
 			answer = "Blue";
 		}
+
 		if (NetworkOut.equals(answer)) {
 			net.incScore();
 		}

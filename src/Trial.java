@@ -14,7 +14,7 @@ public abstract class Trial {
 
 
 	private ArrayList<Network> networks, theBest;
-	private int cycles, numNetworks, numDead, numHistoryInputs;
+	private int cycles, numNetworks, numDead, numHistoryInputs, firstGen;
 	private int[] netStructure, inputHistoryStructure;
 	private ArrayList<ArrayList<Double>> TrialInputs;
 	private boolean fillTheMorgue$;
@@ -36,54 +36,97 @@ public abstract class Trial {
 		this.fillTheMorgue$ = false;
 		this.evolveRate = 0.3;
 		this.learnRate = 0.2;
+		this.firstGen = 0;
 	}
 
 	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend, int numHistoryInputs, int[] inputHistoryStrut){
 		this(numNetworks, numCycles, netStructure, trialInputs, inputLegend);
 		this.numHistoryInputs = numHistoryInputs;
 		this.inputHistoryStructure = inputHistoryStrut;
-		this.TrialInputs = new ArrayList<ArrayList<Double>>();
 		this.expandInputs();
 		this.networks = new ArrayList<Network>();
-		
+		this.firstGen = 0;	
 	}
 
-	public void setEvolveRate(Double evolveRate) {
-		this.evolveRate = evolveRate;
-		this.evolveRate = this.evolveRate > 1 ? 1 : this.evolveRate;
-		this.evolveRate = this.evolveRate < 0 ? 0 : this.evolveRate;
+	//Set = A set of inputs
+	//Cycle = all sets run once, then compare and cull
+	//Trial = all cycles
+	public void run() {
+		this.createNetworks();
+		this.Start = System.nanoTime();
+		for(int i = 1; i <= this.cycles; i++) {
+			System.out.print("Cycle: " + i + "/" + this.cycles + " :: ");
+			this.runCycle();
+		}
+		this.Elapsed = System.nanoTime() - this.Start;
+		System.out.println("--Compiling and Publishing Results--");
+		this.printTrialResults();
+		System.out.println(":::::::::Training Program Complete:::::::::");
+	}
+
+	public void runCycle() {
+		for (int setNum = 0; setNum < TrialInputs.size() - 1; setNum++) {
+			this.runSet(TrialInputs.get(setNum));			
+		}
+		this.runFinalSet(TrialInputs.get(TrialInputs.size() - 1));
+		this.compare();
+		this.cullAndCreate();
+	}
+
+	public void runSet(ArrayList<Double> inputs){
+		// run a set of inputs
+		for (int i = 0; i < this.networks.size(); i++){
+			this.networks.get(i).resetOutputs();			
+			this.networks.get(i).run(inputs);
+			this.evaluateAndUpdate(networks.get(i), inputs);
+		}
+	}
+
+	public void runFinalSet(ArrayList<Double> inputs){
+		for (int i = 0; i < this.networks.size(); i++){
+			this.networks.get(i).resetOutputs();			
+			this.networks.get(i).run(inputs);
+			this.finalEvaluateAndScore(networks.get(i), inputs);
+		}
 	}
 
 	public void createNetworks() {
 		if (this.numHistoryInputs == 0) {
 			for (int i = 0; i < numNetworks; i++) {
-				this.networks.add(new Network(this.netStructure));
+				this.networks.add(new Network(this.netStructure, this.firstGen));
+				this.firstGen++;
 			}		
 		} else {
 			for (int i = 0; i < numNetworks; i++) {
-				this.networks.add(new Network(this.netStructure, this.numHistoryInputs, this.inputHistoryStructure));
+				this.networks.add(new Network(this.netStructure, this.firstGen, this.numHistoryInputs, this.inputHistoryStructure));
 			}
 		}
+	}
+
+	public void setEvolveRate(Double evolveRate) {
+		this.evolveRate = evolveRate;
+		this.evolveRate = this.evolveRate > 1 ? 1 : this.evolveRate;
+		this.evolveRate = this.evolveRate < 0.000000001 ? 0.000000001 : this.evolveRate;
 	}
 	
 	public Double getEvolveRate() {
 		return this.evolveRate;
 	}
-	
+
 	public void setLearnRate(Double learnRate) {
 		this.learnRate = learnRate;
 		this.learnRate = this.learnRate > 2 ? 2 : this.learnRate;
-		this.learnRate = this.learnRate < 0 ? 0 : this.learnRate;
+		this.learnRate = this.learnRate < 0.000000001 ? 0.000000001 : this.learnRate;
 	}
 
 	public Double getLearnRate() {
 		return this.learnRate;
 	}
-	
+
 	public int[] getHistStructure() {
 		return this.inputHistoryStructure;
 	}
-	
+
 	public void setDir(String directory) {
 		this.dir = directory;
 	}
@@ -150,8 +193,12 @@ public abstract class Trial {
 
 	public String stringTrialInputs() {
 		String str = "";
+		ArrayList<ArrayList<Double>> uniqueInputs = new ArrayList<ArrayList<Double>>();
 		for (int i = 0; i < this.getTrialInputs().size(); i++) {
-			str += this.getInputSet(i).toString();
+			uniqueInputs.add(Trial.getUniqueInputs(this.getTrialInputs().get(i)));
+		}
+		for (int i = 0; i < uniqueInputs.size(); i++) {
+			str += uniqueInputs.get(i).toString();
 		}
 		return str;
 	}
@@ -166,73 +213,26 @@ public abstract class Trial {
 
 	public Network getNetwork(int i) {
 		return this.networks.get(i);
-	}
-
-	
-	//Set = A set of inputs
-	//Cycle = all sets run once, then compare and cull
-	//Trial = all cycles
-
-
-	public void run() {
-		
-		this.checkInputsExpanded();
-		this.createNetworks();
-		this.Start = System.nanoTime();
-		for(int i = 0; i < this.cycles; i++) {
-			System.out.print("Cycle: " + i + "/" + this.cycles + " :: ");
-			this.runCycle();
-		}
-		this.Elapsed = System.nanoTime() - this.Start;
-		System.out.println("--Compiling and Publishing Results--");
-		//this.printTrialResults();
-		System.out.println(":::::::::Training Program Complete:::::::::");
-	}
-
-	public void runCycle() {
-		for (int setNum = 0; setNum < TrialInputs.size(); setNum++) {
-			this.runSet(TrialInputs.get(setNum));			
-		}
-		this.compare();
-		this.cullAndCreate();
-	}
-
-	public void runSet(ArrayList<Double> inputs){
-		// run a set of inputs
-		for (int i = 0; i < this.networks.size(); i++){
-			this.networks.get(i).resetOutputs();			
-			this.networks.get(i).run(inputs);
-			this.evaluateAndUpdate(networks.get(i), inputs);
-		}
 	}										
 
-	public void checkInputsExpanded() {
-		if (this.numHistoryInputs > 0 && 
-				this.TrialInputs.get(0).get(0) != this.TrialInputs.get(0).get(1)) {
-			this.expandInputs();
-			
-		}
-	}
-	
 	public void expandInputs() {
 		ArrayList<ArrayList<Double>> trialInputs = new ArrayList<ArrayList<Double>>(this.TrialInputs);
 		this.TrialInputs.clear();
 		for (int i = 0; i < trialInputs.size(); i++){ //for each set of inputs
-			ArrayList<Double> oldInputs = trialInputs.get(i);
+			ArrayList<Double> oldInputs = new ArrayList<Double>(trialInputs.get(i));
 			ArrayList<Double> expandedInputs = new ArrayList<Double>();
 			for (int j = 0; j < trialInputs.get(i).size(); j++) { //for each input in a set
 				if (j < this.numHistoryInputs) {
 					for (int k = 0; k < this.inputHistoryStructure.length; k++)
 						expandedInputs.add(oldInputs.get(j));
-				}
-				if (j >= this.numHistoryInputs) {
+				} else {
 					expandedInputs.add(oldInputs.get(j));
 				}
 			}
 			this.TrialInputs.add(expandedInputs);		
 		}
 	}
-	
+
 	public void compare(){
 		this.networks.addAll(this.theBest);
 		Collections.sort(this.networks, Collections.reverseOrder());
@@ -265,10 +265,15 @@ public abstract class Trial {
 			}			
 		}
 		while (this.networks.size() < numNetworks) {	//fill in the rest of the networks with random 1stGen. 
-			//TODO make a networks.add for historyInputs
-			this.networks.add(new Network(this.netStructure));
+			if (this.numHistoryInputs == 0) {
+				this.networks.add(new Network(this.netStructure, this.firstGen));
+				this.firstGen++;
+			} else {
+				this.networks.add(new Network(this.netStructure, this.firstGen, this.numHistoryInputs, this.inputHistoryStructure));
+				this.firstGen++;
+			}
 		}
-		System.out.print(" Score: " + this.theBest.get(0).getScore() + "\r\n");
+		System.out.print(" High Score: " + this.theBest.get(0).getScore() + "\r\n");
 	}
 
 	public void sendToTheMorgue(ArrayList<Network> bodies){
@@ -385,7 +390,6 @@ public abstract class Trial {
 
 	public void printTrialResults() {
 		String contents = getTrialHeader();
-		contents += this.toStringMorgue();
 		contents += this.toStringInputs();
 		contents += "THE TOP 20% \r\n";
 		for (int i = 0; i < this.theBest.size(); i++) {
@@ -400,19 +404,25 @@ public abstract class Trial {
 
 	public String getTrialHeader() {
 		String contents = this.getClass() + ", completed: " + Trial.dateAndTime() + "    Networks Trained for: " + Trial.convertNanoTime(this.getElapsed()) + "\r\n";
+		contents = contents.substring(6);
 		contents += "   # of Networks : " + this.getNumNetworks() + "\r\n";
 		contents += "     # of Cycles : " + this.getNumCycles() + "\r\n";
-		contents += "Network Structure: " + Arrays.toString(this.getStructure()) + "\r\n";
+		contents += this.toStringMorgue();
+		contents += "Network Structure: \r\n" + Arrays.toString(this.getStructure()) + "\r\n";
+
+		if (this.numHistoryInputs > 0) {
+			contents += "InputNode History Structure: \r\n" + Arrays.toString(this.getInputHistoryStructure()) + "\r\n";
+		}
 
 		return contents;
 	}
 
 	public String toStringMorgue() {
-		String str = "";
+		String str = "    Dead Networks: ";
 		if (this.getMorgue()) {
-			str += "Dead Networks: KEPT\r\n";
+			str += "KEPT\r\n";
 		} else {
-			str += "Dead Networks: DISCARDED\r\n";
+			str += "DISCARDED\r\n";
 		}
 
 		return str;		
@@ -454,6 +464,18 @@ public abstract class Trial {
 		}
 		return file;
 
+	}
+
+	public static ArrayList<Double> getUniqueInputs(ArrayList<Double> originalInputs){
+		ArrayList<Double> uniqueInputs = new ArrayList<Double>();
+		uniqueInputs.add(originalInputs.get(0));
+		for (int i = 1; i < originalInputs.size(); i++) {
+			if (originalInputs.get(i) != uniqueInputs.get(uniqueInputs.size() - 1)) {
+				uniqueInputs.add(originalInputs.get(i));
+			}
+		}
+
+		return uniqueInputs;
 	}
 }
 

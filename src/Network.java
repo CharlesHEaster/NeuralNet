@@ -10,39 +10,33 @@ public class Network implements Comparable<Network>{
 	private ArrayList<ArrayList<Double>> outputs;
 	private ArrayList<Double> networkOutput;
 	private int[] structure;
-	// Network State variables for some future iteration
-	//	private Double[] stateVar; 
-	//	private String[] stateString;
-	private static int FirstGen; // Static in Network assumes only one group of networks at a time, which is true
 
 	//constructors
-	public Network(int[] struct) {  //new network, random nodes, first gen
+	public Network(int[] struct, int firstGen) {
 		this.structure = struct;
 		createNodes(struct);
 		this.score = 0.0;
 		this.heredity = new ArrayList<Integer>();
-		this.heredity.add(Network.FirstGen);
-		Network.FirstGen++;
+		this.heredity.add(firstGen);
 		this.children = 0;
 		this.outputs = new ArrayList<ArrayList<Double>>();
 		this.networkOutput = new ArrayList<Double>();
 		this.checkNetStructure();
 	}
 
-	public Network(int[] struct, int numHistoryInputs, int[] inputHistoryStructure) {  //new network, random nodes, first gen
+	public Network(int[] struct, int firstGen, int numHistoryInputs, int[] inputHistoryStructure) {
 		this.structure = struct;	
 		createNodes(struct, numHistoryInputs, inputHistoryStructure);
 		this.score = 0.0;
 		this.heredity = new ArrayList<Integer>();
-		this.heredity.add(Network.FirstGen);
-		Network.FirstGen++;
+		this.heredity.add(firstGen);
 		this.children = 0;
 		this.outputs = new ArrayList<ArrayList<Double>>();
 		this.networkOutput = new ArrayList<Double>();
 		this.checkNetStructure();
 	}
 
-	public Network(ArrayList<ArrayList<Node>> nodes, ArrayList<Integer> hered) {//new Network, product of a morph
+	public Network(ArrayList<ArrayList<Node>> nodes, ArrayList<Integer> hered) {
 		this.nodes = nodes;
 		this.checkNetStructure();
 		this.heredity = hered;
@@ -119,19 +113,15 @@ public class Network implements Comparable<Network>{
 		//  3b. else input all of the previous outputs as inputs
 		//4. calculate output
 		//5. add it to the ArrayList for the next group of outputs
-		//6. add that ArrayList to Double ArrayList of all node outputs for the network
+		//6. add that ArrayList to 2d ArrayList of all node outputs for the network
 		//7. repeat until all nodes are used.  Last column of outputs is network output.
-		this.outputs.clear();
-		for (int i = 0; i < nodes.size(); i++) {	//for each layer i
+		for (int i = 0; i < nodes.size(); i++) {
 			ArrayList<Double> nextOutput = new ArrayList<Double>();
-			for (int j = 0; j < nodes.get(i).size(); j++) { // for each node in layer j
+			for (int j = 0; j < nodes.get(i).size(); j++) {
 				Node n = this.nodes.get(i).get(j);
 				if (n instanceof InputNode) {
 					InputNode nInput = (InputNode)n;
 					nInput.setInput(inputs.get(j));
-					nextOutput.add(n.calcOutput());
-				} else if (n instanceof OutputNode){
-					n.setInputs(this.outputs.get(i - 1));
 					nextOutput.add(n.calcOutput());
 				} else {
 					n.setInputs(this.outputs.get(i - 1));
@@ -156,11 +146,10 @@ public class Network implements Comparable<Network>{
 
 	public String toString() {
 		this.checkNetStructure();
-		String str = "Network {\r\n Heredity ";
-		str += this.heredity.toString();
-		str += "\r\n  Network Structure ";
-		str += Arrays.toString(this.getStructure());
-		str += "  Score: " + this.getScore() + "\r\n\r\n";
+		String str = "Network {\r\n  Generation: " + this.heredity.size();
+		str += "\r\n  Heredity " + this.heredity.toString();
+		str += "\r\n  Network Structure " + Arrays.toString(this.getStructure());
+		str += "  Score: " + this.getScore() + "\r\n";
 		str += " Nodes::";
 		for (int i = 0; i < this.nodes.size(); i++) {
 			for (int j = 0; j < this.nodes.get(i).size(); j++) {
@@ -194,7 +183,7 @@ public class Network implements Comparable<Network>{
 	}
 
 	public void incScore() {
-		this.score++;
+		this.score += 1;
 	}	
 	public void incScore(double inc) {
 		this.score += inc;
@@ -221,49 +210,19 @@ public class Network implements Comparable<Network>{
 		this.checkNetStructure();
 		return this.structure;
 	}
+	
+	
+	public ArrayList<Integer> getHeredity(){
+		return this.heredity;
+	}
+	
+	public int getGeneration() {
+		return this.heredity.size();
+	}
 
 	public ArrayList<Double> getNetworkOutput() {
 		return this.networkOutput;
 	}
-
-	//Network State variables for some future iteration
-	//	public Double getStateVar(int i) {
-	//		return this.stateVar[i];
-	//	}
-	//
-	//	public void setStateVar(int i, Double var){
-	//		this.stateVar[i] = var;
-	//	}
-	//
-	//	public Double[ ] getStateVar() {
-	//		return this.stateVar;
-	//	}
-	//
-	//	public void setStateVar(Double[ ] var){
-	//		this.stateVar = var;
-	//	}
-	//
-	//	public void resetStateVar(){
-	//		for(int i =0; i < this.stateVar.length; i++){
-	//			this.stateVar[i] = 0;
-	//		}
-	//	}
-	//
-	//	public String getStateString(int i) {
-	//		return this.stateString[i];
-	//	}
-	//
-	//	public void setStateString(int i, String str){
-	//		this.stateString[i] = str;
-	//	}
-	//
-	//	public String[ ] getStateString() {
-	//		return this.stateString;
-	//	}
-	//
-	//	public void setStateString(String[ ] str){
-	//		this.stateString = str;
-	//	} 
 
 	public Network morph(Double evolveRate, Double learnRate){
 		ArrayList<ArrayList<Node>> newNodes = new ArrayList<ArrayList<Node>>();
@@ -282,9 +241,14 @@ public class Network implements Comparable<Network>{
 		return new Network(newNodes, newHered);
 	}
 
+
 	@Override
-	public int compareTo(Network o) { //to run a sort method on ArrayList<Network> networks need to be able to be compared.  
-		return this.getScore().compareTo(o.getScore()); //This Override effectively tells the compare function which variable to use.
+	public int compareTo(Network that) { //to run a sort method on ArrayList<Network> networks need to be able to be compared. 
+		Double thisNet = this.getScore();
+		Double thatNet = that.getScore();
+		thisNet -= this.getHeredity().size() * .0000001;
+		thatNet -= that.getHeredity().size() * .0000001;
+		return thisNet.compareTo(thatNet); //This Override effectively tells the compare function which variable to use.
 	} 
 
 }

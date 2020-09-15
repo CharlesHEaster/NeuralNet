@@ -1,8 +1,3 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class testStuff {
 
@@ -13,7 +8,7 @@ public class testStuff {
 	  
 	  
 	  
-	  ColorTrial C = new ColorTrial(100, 100, netStrut, 100, 2, inputHistoryStrut);
+	  ColorTrial C = new ColorTrial(10, 10, netStrut, 100, 3, inputHistoryStrut);
 
 	  
 	 
