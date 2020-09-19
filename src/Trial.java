@@ -19,9 +19,8 @@ public abstract class Trial {
 	private ArrayList<ArrayList<Double>> TrialInputs;
 	private boolean fillTheMorgue$;
 	private String[] InputLegend;
-	private long Start, Elapsed;
-	private String workingMorgueFile = "";
-	private String dir, FileName;
+	private long Start;
+	private String dir, morgueDir, workingFileName, FileName;
 	private Double evolveRate, learnRate;
 
 	//constructors
@@ -37,6 +36,8 @@ public abstract class Trial {
 		this.evolveRate = 0.3;
 		this.learnRate = 0.2;
 		this.firstGen = 0;
+		this.workingFileName = Trial.dateAndTime() + "_Working.txt";
+		
 	}
 
 	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend, int numHistoryInputs, int[] inputHistoryStrut){
@@ -57,10 +58,14 @@ public abstract class Trial {
 		for(int i = 1; i <= this.cycles; i++) {
 			System.out.print("Cycle: " + i + "/" + this.cycles + " :: ");
 			this.runCycle();
+			String save = this.toSave(i);
+			Trial.writeNewFile(this.getDir(), this.getWorkingFileName(), save);
 		}
-		this.Elapsed = System.nanoTime() - this.Start;
 		System.out.println("--Compiling and Publishing Results--");
 		this.printTrialResults();
+		if (this.fillTheMorgue$) {
+			this.closeTheMorgue();
+		}
 		System.out.println(":::::::::Training Program Complete:::::::::");
 	}
 
@@ -91,7 +96,7 @@ public abstract class Trial {
 	}
 
 	public void createNetworks() {
-		if (this.numHistoryInputs == 0) {
+		if (this.numHistoryInputs <= 0) {
 			for (int i = 0; i < numNetworks; i++) {
 				this.networks.add(new Network(this.netStructure, this.firstGen));
 				this.firstGen++;
@@ -99,6 +104,7 @@ public abstract class Trial {
 		} else {
 			for (int i = 0; i < numNetworks; i++) {
 				this.networks.add(new Network(this.netStructure, this.firstGen, this.numHistoryInputs, this.inputHistoryStructure));
+				this.firstGen++;
 			}
 		}
 	}
@@ -108,7 +114,7 @@ public abstract class Trial {
 		this.evolveRate = this.evolveRate > 1 ? 1 : this.evolveRate;
 		this.evolveRate = this.evolveRate < 0.000000001 ? 0.000000001 : this.evolveRate;
 	}
-	
+
 	public Double getEvolveRate() {
 		return this.evolveRate;
 	}
@@ -123,16 +129,40 @@ public abstract class Trial {
 		return this.learnRate;
 	}
 
+	public String getWorkingFileName() {
+		return workingFileName;
+	}
+
+	public void setWorkingFileName(String workingFileName) {
+		this.workingFileName = workingFileName;
+	}
+
 	public int[] getHistStructure() {
 		return this.inputHistoryStructure;
 	}
 
-	public void setDir(String directory) {
-		this.dir = directory;
+	public String getBaseDir() {
+		return System.getProperty("user.dir");
+	}
+	
+	public void setDir(String D) {
+		this.dir = D;
+		File directory = new File(this.dir);
+		if (! directory.exists()){
+			directory.mkdir();
+		}
 	}
 
 	public String getDir() {
 		return this.dir;
+	}
+	
+	public void setMorgueDir(String dir) {
+		this.morgueDir = dir;
+	}
+	
+	public String getMorgueDir() {
+		return this.morgueDir;
 	}
 
 	public void setMorgue(boolean fill$) {
@@ -184,7 +214,7 @@ public abstract class Trial {
 	}
 
 	public long getElapsed() {
-		return this.Elapsed;
+		return  System.nanoTime() - this.Start;
 	}
 
 	public ArrayList<Double> getInputSet(int i){
@@ -245,9 +275,9 @@ public abstract class Trial {
 		int top20 = (int)(Math.floor(this.numNetworks * 0.20));
 		this.theBest.addAll(this.networks.subList(0,  top20)); // grab the top 20% and put them into 'theBest'
 		if (this.fillTheMorgue$) {
-			ArrayList<Network> morgue = new ArrayList<Network>(this.networks.subList(top20,  this.networks.size() - 1));
-			this.sendToTheMorgue(morgue);
-			this.numDead += morgue.size();
+			ArrayList<Network> newBodies = new ArrayList<Network>(this.networks.subList(top20,  this.networks.size() - 1));
+			this.addToTheMorgue(newBodies);
+			this.numDead += newBodies.size();
 		}
 		this.networks.clear();
 		for (int i = 0; i < this.theBest.size(); i++) { // roll through those top 20%
@@ -276,40 +306,55 @@ public abstract class Trial {
 		System.out.print(" High Score: " + this.theBest.get(0).getScore() + "\r\n");
 	}
 
-	public void sendToTheMorgue(ArrayList<Network> bodies){
-		File directory = new File(this.getDir());
-		File file = new File("");
+	public void addToTheMorgue(ArrayList<Network> bodies){
+		File directory = new File(this.morgueDir);
 		if (! directory.exists()){
 			directory.mkdir();
-			this.workingMorgueFile = "WorkingMorgue.txt";
-			file = new File(directory + "/" + this.workingMorgueFile);
-		} else {
-			if (this.workingMorgueFile == ""){
-				this.workingMorgueFile = "WorkingMorgue.txt";
-				file = new File(directory + "/" + this.workingMorgueFile);
-				for (int i = 2; file.exists(); i++) {
-					this.workingMorgueFile = "WorkingMorgue" + i + ".txt";
-					file = new File(directory + "/" + this.workingMorgueFile);
-				}
-			}
+		}
+		String morgueFile = "1.txt";
+		File morgueFull = new File(this.morgueDir + "/" + morgueFile);
+		for (int i = 2; morgueFull.exists(); i++) {
+			morgueFile = "/" + i + ".txt";
+			morgueFull = new File(this.morgueDir +  "/" + morgueFile);
 		}
 		String str = "";
 		for (int i = 0; i < bodies.size(); i++) {
-			str += bodies.get(i).toString();
+			str += bodies.get(i).toSave();
 		}
-		Trial.writeFile(this.getDir(), this.workingMorgueFile, str);
+		Trial.addMorgueFile(this.morgueDir, morgueFile, str);
+	}
+	
+	public void closeTheMorgue() {
+		File sourceFile = new File(this.morgueDir);
+		File destFile = new File(this.getDir() + "/" + this.FileName.substring(0, this.FileName.length() - 4) + "_Morgue");
+		if(sourceFile.renameTo(destFile)) {
+			this.setMorgueDir(destFile.getPath());
+		}
 	}
 
-
-	public void closeTheMorgue(){
-		String str = this.getTrialHeader();
-		str += "Networks in Morgue: " + this.numDead + "\r\n\r\n";
-		str += Trial.readFile(this.getDir(), this.workingMorgueFile);
-		Trial.writeFile(this.getDir(), this.FileName + "--Morgue.txt", str);
-		File oldMorgue = new File(this.getDir() + "/" + this.workingMorgueFile);
-		oldMorgue.delete();
+	public void compileTheMorgue() {
+		if (!this.fillTheMorgue$) {
+			System.out.println("Cannot compile the morgue because it is not on.");
+		} else {
+			System.out.println("Compiling Morgue...");
+		}
+		String theWholeMorgue = "";
+		String morgueFileName = "/1.txt";
+		File morgueFile = new File(this.morgueDir + morgueFileName);
+		for (int i = 2; morgueFile.exists(); i++) {
+			theWholeMorgue += Trial.readFile(this.morgueDir, morgueFileName);
+			
+			morgueFileName = "/" + i + ".txt";
+			morgueFile = new File(morgueDir + morgueFileName);
+		}
+		
+		if(Trial.writeNewFile(this.dir, this.FileName.substring(0, this.FileName.length() - 4) + "_Morgue.txt", theWholeMorgue)) {
+			System.out.println("Morgue Compiled");
+		} else {
+			System.out.println("Morgue Compile Failed");
+		}
 	}
-
+	
 	public static String dateAndTime() {
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd--HH-mm-ss");  
 		LocalDateTime now = LocalDateTime.now();  
@@ -345,7 +390,7 @@ public abstract class Trial {
 		return str;
 	}
 
-	public static void writeFile(String dir, String name, String value){
+	public static boolean addMorgueFile(String dir, String name, String value){
 		String directoryName = dir;
 		String fileName = name;
 
@@ -355,31 +400,46 @@ public abstract class Trial {
 		}
 
 		File file = new File(directoryName + "/" + fileName);
-		if (file.exists()) {
-			try{
-				FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
-				BufferedWriter bw = new BufferedWriter(fw);
-				bw.write(value);
-				bw.close();
-			}
-			catch (IOException e){
-				e.printStackTrace();
-				System.exit(-1);
-			}
+		try{
+			FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(value);
+			bw.close();
+			return true;
 		}
+		catch (IOException e){
+			e.printStackTrace();
+			System.exit(-1);
+			return false;
+		}
+	}
+
+	public static boolean writeNewFile(String dir, String name, String value){
+		String directoryName = dir;
+		String fileName = name;
+
+		File directory = new File(directoryName);
+		if (! directory.exists()){
+			directory.mkdir();
+		}
+
+		File file = new File(directoryName + "/" + fileName);
 
 		try{
 			FileWriter fw = new FileWriter(file.getAbsoluteFile());
 			BufferedWriter bw = new BufferedWriter(fw);
 			bw.write(value);
 			bw.close();
+			return true;
 		}
 		catch (IOException e){
 			e.printStackTrace();
 			System.exit(-1);
+			return false;
 		}
 	}
 
+	
 	//This method takes in a network and it's outputs.  then evaluates those outputs against the answer and updates the network
 	public abstract void evaluateAndUpdate(Network net, ArrayList<Double> SetOfInputs);
 
@@ -388,19 +448,39 @@ public abstract class Trial {
 	//  else it can take the state variables and compute a score
 	public abstract void finalEvaluateAndScore(Network net, ArrayList<Double> SetOfInputs);
 
+	public String toSave(int currentCycle) {
+		String save = this.getClass() + ", Copy Saved: " + Trial.dateAndTime();
+		save = save.substring(6);
+		save += "    Networks Trained for: " + Trial.convertNanoTime(this.getElapsed()) + "\r\n";
+		save += "   # of Networks : " + this.getNumNetworks() + "\r\n";
+		save += "          Cycles : " + currentCycle + "/" + this.getNumCycles() + "\r\n";
+		save += this.toStringMorgue();
+		save += "       Learn Rate: " + this.learnRate + "\r\n";
+		save += "      Evolve Rate: " + this.evolveRate + "\r\n";
+		save += " Starting Network Structure: " + Arrays.toString(this.getStructure()) + "\r\n";
+		save += "  FirstGen Networks Created: " + this.firstGen + "\r\n";
+		save += this.toStringInputs();
+		save += "BestNetworks{\r\n";
+		for (int i = 0; i < networks.size(); i++) {
+			save += networks.get(i).toSave(); 
+		}
+		save += "}/BestNetworks";
+
+		return save;
+	}
 	public void printTrialResults() {
 		String contents = getTrialHeader();
-		contents += this.toStringInputs();
 		contents += "THE TOP 20% \r\n";
 		for (int i = 0; i < this.theBest.size(); i++) {
 			contents += this.getTheBest(i).toString();
 		}		
-		this.FileName = Trial.dateAndTime();
-		Trial.writeFile(this.getDir(), this.FileName + ".txt", contents);
-		if (this.fillTheMorgue$){
-			this.closeTheMorgue(); 
+		this.FileName = Trial.dateAndTime() + ".txt";
+		if (Trial.writeNewFile(this.getDir(), this.FileName, contents)) {
+				File working = new File(this.getDir() + "/" + this.getWorkingFileName());
+				working.delete();
+			}
 		}
-	}
+	
 
 	public String getTrialHeader() {
 		String contents = this.getClass() + ", completed: " + Trial.dateAndTime() + "    Networks Trained for: " + Trial.convertNanoTime(this.getElapsed()) + "\r\n";
@@ -408,11 +488,8 @@ public abstract class Trial {
 		contents += "   # of Networks : " + this.getNumNetworks() + "\r\n";
 		contents += "     # of Cycles : " + this.getNumCycles() + "\r\n";
 		contents += this.toStringMorgue();
-		contents += "Network Structure: \r\n" + Arrays.toString(this.getStructure()) + "\r\n";
-
-		if (this.numHistoryInputs > 0) {
-			contents += "InputNode History Structure: \r\n" + Arrays.toString(this.getInputHistoryStructure()) + "\r\n";
-		}
+		contents += " Starting Network Structure: " + Arrays.toString(this.getStructure()) + "\r\n";
+		contents += this.toStringInputs();
 
 		return contents;
 	}
@@ -429,12 +506,17 @@ public abstract class Trial {
 	}
 
 	public String toStringInputs() {
-		String contents = "Input Legend\r\n";
-		contents += Arrays.toString(this.getInputLegend()) + "\r\n\r\n";
-		contents += "Inputs\r\n";
-		contents += this.stringTrialInputs() + "\r\n\r\n";
+		String inputString = "";
+		if (this.numHistoryInputs > 0) {
+			inputString += "      Unique History Inputs: " + this.numHistoryInputs + "\r\n";
+			inputString += "InputNode History Structure: " + Arrays.toString(this.getInputHistoryStructure()) + "\r\n";
+			}
+		inputString += "               Input Legend: ";
+		inputString += Arrays.toString(this.getInputLegend()) + "\r\n";
+		inputString += "Inputs\r\n";
+		inputString += this.stringTrialInputs() + "\r\n\r\n";
 
-		return contents;
+		return inputString;
 	}
 
 	public static String readFile(String directory, String fileName) {

@@ -112,4 +112,13 @@ public class InputNode extends Node{
 		}
 		return new InputNode(this.histCapasity, newBias);
 	}
+	
+	@Override
+	public String toString() {
+		String str = "Weights ";
+		str += this.toStringRoundedWeights();
+		str += "\nOutput = " + this.output;
+
+		return str;
+	}
 }

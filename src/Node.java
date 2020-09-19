@@ -83,32 +83,23 @@ public class Node {
 	@Override
 	public String toString() { 
 		String str = "Weights ";
-		str += this.toStringBasic();
+		str += this.toStringRoundedWeights();
 		str += "\nOutput = " + this.output;
 
 		return str;
 	}
 
-	public String toStringDetail() { 
+	public String toSaveWeights() { 
 		String str = "Weights [";
 		for ( Double weight: this.weights){
 			str += weight + ", ";
 		}
 		str = str.substring(0, str.length() - 2) + "]";
 
-		if (this.inputs != null) {
-			str += "\nInputs [";
-			for( Double input: this.inputs){
-				str += input + ", ";
-			}
-			str = str.substring(0, str.length() - 2) + "]";
-		}
-		str += "\nOutput = " + this.output;
-
 		return str;
 	}
 	
-	public String toStringBasic() { 
+	public String toStringRoundedWeights() { 
 		String str = "[";
 		for (Double weight: this.weights){
 			str += String.format("%.3f, ", weight);

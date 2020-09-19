@@ -7,7 +7,7 @@ public class ColorTrial extends Trial {
 		super(numNetworks, numCycles, netStructure, new ArrayList<ArrayList<Double>>(), new String[] {});
 		this.setTrialInputs(ColorTrial.makeSomeColors(numColors));
 		this.setInputLegend(new String[] {"Red", "Green", "Blue"});
-		this.setDir("ColorTrialResults");
+		this.setDir(this.getBaseDir() + "/ColorTrialResults");
 	}
 	
 	public ColorTrial(int numNetworks, int numCycles, int[] netStructure, int numColors, int numHistoryInpu, int[] inputHistoryStrut) {
@@ -15,7 +15,8 @@ public class ColorTrial extends Trial {
 		this.setTrialInputs(ColorTrial.makeSomeColors(numColors));
 		this.expandInputs();
 		this.setInputLegend(new String[] {"Red", "Green", "Blue"});
-		this.setDir("ColorTrialResults");
+		this.setDir(this.getBaseDir() + "/ColorTrialResults");
+		this.setMorgueDir(this.getDir() + "/" + this.getWorkingFileName().substring(0, this.getWorkingFileName().length() - 4) + "_Morgue");
 		
 	}
 

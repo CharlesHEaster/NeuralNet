@@ -146,11 +146,11 @@ public class Network implements Comparable<Network>{
 
 	public String toString() {
 		this.checkNetStructure();
-		String str = "Network {\r\n  Generation: " + this.heredity.size();
-		str += "\r\n  Heredity " + this.heredity.toString();
-		str += "\r\n  Network Structure " + Arrays.toString(this.getStructure());
+		String str = "Network {\r\n  Generation: " + this.heredity.size() + "  ";
 		str += "  Score: " + this.getScore() + "\r\n";
-		str += " Nodes::";
+		str += "  Heredity " + this.heredity.toString() + "\r\n";;
+		str += "  Network Structure " + Arrays.toString(this.getStructure()) + "\r\n";
+		str += "  Nodes::";
 		for (int i = 0; i < this.nodes.size(); i++) {
 			for (int j = 0; j < this.nodes.get(i).size(); j++) {
 				str += "\r\n   Node[" + i + "][" + j + "] ";
@@ -176,6 +176,33 @@ public class Network implements Comparable<Network>{
 		}
 		str += "\r\n" + "}" + "\r\n\r\n";
 		return str;	
+	}
+	
+	public String toSave() {
+		String save = "Network{\r\n";
+		save += "  Heredity{" + this.heredity.toString() + "}\r\n";
+		save += "  Score: " + this.getScore() + "\r\n";
+		save += "  Nodes: ";
+		for (int j = 0; j < this.nodes.get(0).size(); j++) {
+			Node n = this.nodes.get(0).get(j);
+			save += " node{InputNode(HistCapasity: " + ((InputNode)n).getHistCapasity() + ")";
+			save += n.toSaveWeights();
+			save += "}\r\n";
+		}
+
+		 
+		for (int i = 1; i < this.nodes.size(); i++) {
+			for (int j = 0; j < this.nodes.get(i).size(); j++) {
+				Node n = this.nodes.get(i).get(j);
+				save += " node{";
+				save += n.toSaveWeights();
+				save += "}\r\n";
+				}
+
+			} 
+		save += "}/Nodes}/Network\r\n";
+		
+		return save;
 	}
 
 	public ArrayList<Double> getOutput() {
