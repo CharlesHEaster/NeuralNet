@@ -2,11 +2,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class OutputNode extends Node{
+	String outputLabel = "";
 
-	public OutputNode(int numWeights) {
+	public OutputNode(int numWeights, String label) {
 		super(numWeights);
 		this.setWeights(Arrays.copyOf(this.getWeights(), this.getWeights().length - 1));
-
+		this.setOutputLabel(label);
 	}
 	
 	public OutputNode(Node N) {
@@ -16,8 +17,17 @@ public class OutputNode extends Node{
 		}
 	}
 	
-	public OutputNode(Double[] weights) {
+	public OutputNode(Double[] weights, String label) {
 		super(weights);
+		this.setOutputLabel(label);
+	}
+	
+	public void setOutputLabel(String label) {
+		this.outputLabel = label;
+	}
+	
+	public String getOutputLabel() {
+		return this.outputLabel;
 	}
 	
 	@Override
@@ -54,7 +64,8 @@ public class OutputNode extends Node{
 				newWeights[i] = this.getWeights()[i]; 
 			}
 		}
-		return new OutputNode(newWeights);
+		String newLabel = this.getOutputLabel();
+		return new OutputNode(newWeights, newLabel);
 	}
 	
 	@Override

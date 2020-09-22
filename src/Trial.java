@@ -18,14 +18,15 @@ public abstract class Trial {
 	private int[] netStructure, inputHistoryStructure;
 	private ArrayList<ArrayList<Double>> TrialInputs;
 	private boolean fillTheMorgue$;
-	private String[] InputLegend;
+	private String[][] IOLegend;
 	private long Start;
 	private String dir, morgueDir, workingFileName, FileName;
 	private Double evolveRate, learnRate;
+	private Double[][] inputMinMax;
 
 	//constructors
-	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend){
-		this.InputLegend = inputLegend;
+	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[][] ioLegend){
+		this.IOLegend = ioLegend;
 		this.TrialInputs = trialInputs;
 		this.networks = new ArrayList<Network>();
 		this.numNetworks = numNetworks;
@@ -40,8 +41,8 @@ public abstract class Trial {
 		
 	}
 
-	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[] inputLegend, int numHistoryInputs, int[] inputHistoryStrut){
-		this(numNetworks, numCycles, netStructure, trialInputs, inputLegend);
+	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[][] ioLegend, int numHistoryInputs, int[] inputHistoryStrut){
+		this(numNetworks, numCycles, netStructure, trialInputs, ioLegend);
 		this.numHistoryInputs = numHistoryInputs;
 		this.inputHistoryStructure = inputHistoryStrut;
 		this.expandInputs();
@@ -54,6 +55,7 @@ public abstract class Trial {
 	//Trial = all cycles
 	public void run() {
 		this.createNetworks();
+		this.passInputMinMax();
 		this.Start = System.nanoTime();
 		for(int i = 1; i <= this.cycles; i++) {
 			System.out.print("Cycle: " + i + "/" + this.cycles + " :: ");
@@ -98,12 +100,12 @@ public abstract class Trial {
 	public void createNetworks() {
 		if (this.numHistoryInputs <= 0) {
 			for (int i = 0; i < numNetworks; i++) {
-				this.networks.add(new Network(this.netStructure, this.firstGen));
+				this.networks.add(new Network(this.netStructure, this.firstGen, this.IOLegend));
 				this.firstGen++;
 			}		
 		} else {
 			for (int i = 0; i < numNetworks; i++) {
-				this.networks.add(new Network(this.netStructure, this.firstGen, this.numHistoryInputs, this.inputHistoryStructure));
+				this.networks.add(new Network(this.netStructure, this.firstGen, this.IOLegend, this.numHistoryInputs, this.inputHistoryStructure));
 				this.firstGen++;
 			}
 		}
@@ -127,6 +129,22 @@ public abstract class Trial {
 
 	public Double getLearnRate() {
 		return this.learnRate;
+	}
+	
+	public void setInputMinMax(Double[][] MinMax) {
+		this.inputMinMax = MinMax;
+	}
+	
+	public void passInputMinMax() {
+		if (this.inputMinMax.length > 1) {
+			for (int i = 0; i < this.getNumNetworks(); i++) {
+				this.getNetwork(i).setInputMinMax(this.inputMinMax);
+			}
+		} else {
+			for (int i = 0; i < this.getNumNetworks(); i++) {
+				this.getNetwork(i).setInputMinMax(this.inputMinMax[0]);
+			}
+		}
 	}
 
 	public String getWorkingFileName() {
@@ -188,6 +206,10 @@ public abstract class Trial {
 	public int[] getStructure() {
 		return this.netStructure;
 	}
+	
+	public void setStructure(int[] structure) {
+		this.netStructure = structure;
+	}
 
 	public void setTrialInputs(ArrayList<ArrayList<Double>> trialInputs) {
 		this.TrialInputs = trialInputs;
@@ -198,11 +220,27 @@ public abstract class Trial {
 	}
 
 	public void setInputLegend(String[] inputLegend) {
-		this.InputLegend = inputLegend;
+		this.IOLegend[0] = inputLegend;
 	}
 
 	public String[] getInputLegend() {
-		return this.InputLegend;
+		return this.IOLegend[0];
+	}
+	
+	public void setOutputLegend(String[] outputLegend) {
+		this.IOLegend[1] = outputLegend;
+	}
+
+	public String[] getOutputLegend() {
+		return this.IOLegend[1];
+	}
+	
+	public void setIOLegend(String[][] ioLegend) {
+		this.IOLegend = ioLegend;
+	}
+
+	public String[][] getIOLegend() {
+		return this.IOLegend;
 	}
 
 	public ArrayList<Network> getTheBest(){
@@ -296,10 +334,10 @@ public abstract class Trial {
 		}
 		while (this.networks.size() < numNetworks) {	//fill in the rest of the networks with random 1stGen. 
 			if (this.numHistoryInputs == 0) {
-				this.networks.add(new Network(this.netStructure, this.firstGen));
+				this.networks.add(new Network(this.netStructure, this.firstGen, this.IOLegend));
 				this.firstGen++;
 			} else {
-				this.networks.add(new Network(this.netStructure, this.firstGen, this.numHistoryInputs, this.inputHistoryStructure));
+				this.networks.add(new Network(this.netStructure, this.firstGen, this.IOLegend, this.numHistoryInputs, this.inputHistoryStructure));
 				this.firstGen++;
 			}
 		}

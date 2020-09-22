@@ -10,11 +10,13 @@ public class Network implements Comparable<Network>{
 	private ArrayList<ArrayList<Double>> outputs;
 	private ArrayList<Double> networkOutput;
 	private int[] structure;
+	private String[][] IOLegend;
 
 	//constructors
-	public Network(int[] struct, int firstGen) {
+	public Network(int[] struct, int firstGen, String[][] ioLegend) {
+		this.IOLegend = ioLegend;
 		this.structure = struct;
-		createNodes(struct);
+		createNodes();
 		this.score = 0.0;
 		this.heredity = new ArrayList<Integer>();
 		this.heredity.add(firstGen);
@@ -24,9 +26,10 @@ public class Network implements Comparable<Network>{
 		this.checkNetStructure();
 	}
 
-	public Network(int[] struct, int firstGen, int numHistoryInputs, int[] inputHistoryStructure) {
+	public Network(int[] struct, int firstGen, String[][] ioLegend, int numHistoryInputs, int[] inputHistoryStructure) {
+		this.IOLegend = ioLegend;
 		this.structure = struct;	
-		createNodes(struct, numHistoryInputs, inputHistoryStructure);
+		createNodes(numHistoryInputs, inputHistoryStructure);
 		this.score = 0.0;
 		this.heredity = new ArrayList<Integer>();
 		this.heredity.add(firstGen);
@@ -49,17 +52,17 @@ public class Network implements Comparable<Network>{
 
 
 	//utilities
-	private void createNodes(int[] netStructure) {
+	private void createNodes() {
 		this.nodes = new ArrayList<ArrayList<Node>>();
-		for (int i = 0; i < netStructure.length; i++) {
+		for (int i = 0; i < this.structure.length; i++) {
 			ArrayList<Node> currentLayer = new ArrayList<Node>();
-			for (int j = 0; j < netStructure[i]; j++) {
+			for (int j = 0; j < this.structure[i]; j++) {
 				if (i == 0) {
-					currentLayer.add(new InputNode());
-				} else if (i == netStructure.length - 1){
-					currentLayer.add(new OutputNode(netStructure[i - 1]));
+					currentLayer.add(new InputNode(this.getIOLegend()[0][j]));
+				} else if (i == this.structure.length - 1){
+					currentLayer.add(new OutputNode(this.structure[i - 1], this.getIOLegend()[1][j]));
 				} else {
-					currentLayer.add(new Node(netStructure[i - 1]));
+					currentLayer.add(new Node(this.structure[i - 1]));
 				}
 			}
 			this.nodes.add(currentLayer);
@@ -67,26 +70,26 @@ public class Network implements Comparable<Network>{
 		this.checkNetStructure();
 	}
 
-	private void createNodes(int[] netStructure, int numHistoryInputs, int[] inputHistoryStructure) {
+	private void createNodes(int numHistoryInputs, int[] inputHistoryStructure) {
 		this.nodes = new ArrayList<ArrayList<Node>>();
-		for (int i = 0; i < netStructure.length; i++) {  
+		for (int i = 0; i < this.structure.length; i++) {  
 			ArrayList<Node> currentLayer = new ArrayList<Node>();
 			if (i == 0) { 
 				for (int j = 0; j < numHistoryInputs; j++) { 
 					for (int k = 0; k < inputHistoryStructure.length; k++) { 
-						currentLayer.add(new InputNode(inputHistoryStructure[k]));
+						currentLayer.add(new InputNode(inputHistoryStructure[k], this.getIOLegend()[0][j]));
 					}
 				}
 				for (int j = numHistoryInputs; j < this.structure[0]; j++) {
 					currentLayer.add(new InputNode());
 				}
-			} else if ( i == netStructure.length - 1) {
-				for (int j = 0; j < netStructure[i]; j++){
+			} else if ( i == this.structure.length - 1) {
+				for (int j = 0; j < this.structure[i]; j++){
 					int lastLayerSize = this.nodes.get(this.nodes.size() - 1).size();
-					currentLayer.add(new OutputNode(lastLayerSize));
+					currentLayer.add(new OutputNode(lastLayerSize, this.getIOLegend()[1][j]));
 				}
 			} else {
-				for (int j = 0; j < netStructure[i]; j++){
+				for (int j = 0; j < this.structure[i]; j++){
 					int lastLayerSize = this.nodes.get(this.nodes.size() - 1).size();
 					currentLayer.add(new Node(lastLayerSize));
 				}
@@ -204,9 +207,30 @@ public class Network implements Comparable<Network>{
 		
 		return save;
 	}
+	
+	public static OutputNode findHighestOutputNode(Network N) {
+		ArrayList<OutputNode> outputNodes = N.getOutputLayer();
+		OutputNode HighestNode = outputNodes.get(0);
+		for (int i = 1; i < outputNodes.size(); i++) {
+			if (outputNodes.get(i).getOutput() > HighestNode.getOutput()) {
+				HighestNode = outputNodes.get(i);
+			}
+		}
+		return HighestNode;
+	}
 
 	public ArrayList<Double> getOutput() {
 		return this.networkOutput;
+	}
+	
+	public ArrayList<OutputNode> getOutputLayer(){
+		ArrayList<Node> outputLayer = this.getNodes().get(this.getNodes().size() - 1);
+		ArrayList<OutputNode> OUT = new ArrayList<OutputNode>();
+		for (int i = 0; i < outputLayer.size(); i++) {
+			OUT.add((OutputNode)(outputLayer.get(i)));
+		}
+		
+		return OUT;
 	}
 
 	public void incScore() {
@@ -231,6 +255,37 @@ public class Network implements Comparable<Network>{
 
 	public Node getNode(int col, int colnum) {
 		return this.nodes.get(col).get(colnum);
+	}
+	
+	public void setInputMinMax(Double[] MinMax) {
+		for (int i = 0; i < this.getNodeLayer(0).size(); i++) {
+			((InputNode) this.getNode(0,  i)).setMin(MinMax[0]);
+			((InputNode) this.getNode(0,  i)).setMax(MinMax[1]);
+		}
+	}
+	
+	public void setInputMinMax(Double[][] MinMax) {
+		for (int i = 0; i < this.getNodeLayer(0).size(); i++) {
+			((InputNode) this.getNode(0,  i)).setMin(MinMax[i][0]);
+			((InputNode) this.getNode(0,  i)).setMax(MinMax[i][1]);
+		}
+	}
+	
+	
+	public ArrayList<ArrayList<Node>> getNodes(){
+		return this.nodes;
+	}
+	
+	public ArrayList<Node> getNodeLayer(int i){
+		return this.nodes.get(i);
+	}
+	
+	public String[][] getIOLegend(){
+		return this.IOLegend;
+	}
+	
+	public void setIOLegend(String[][] legend) {
+		this.IOLegend = legend;
 	}
 
 	public int[] getStructure() {

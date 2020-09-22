@@ -82,9 +82,8 @@ public class Node {
 	// utilities
 	@Override
 	public String toString() { 
-		String str = "Weights ";
-		str += this.toStringRoundedWeights();
-		str += "\nOutput = " + this.output;
+		String str = "Weights " + this.toStringRoundedWeights();
+		str += "\r\nOutput = " + this.output;
 
 		return str;
 	}

@@ -6,6 +6,7 @@ public class InputNode extends Node{
 	private Double input;
 	private int histCapasity = -1;
 	private ArrayList<Double> history;
+	private String inputLabel;
 	
 	public InputNode() {
 		super(0);
@@ -13,28 +14,41 @@ public class InputNode extends Node{
 		this.max = 0.0;
 	}
 	
-	public InputNode(int histCapasity) {
-		super(0);
-		this.min = 0.0;
-		this.max = 0.0;
+	public InputNode(String label) {
+		this();
+		this.setInputLabel(label);
+	}
+	
+	public InputNode(int histCapasity, String label) {
+		this(label);
 		this.histCapasity = histCapasity;
 		this.history = new ArrayList<Double>();
 	}
 	
-	public InputNode(int hist, Double bias) {
-		super(0);
-		this.min = 0.0;
-		this.max = 0.0;
-		this.histCapasity = hist;
+	public InputNode(int hist, Double bias, String label) {
+		this(hist, label);
 		this.setBias(bias);
-		this.history = new ArrayList<Double>();
 	}
 	
-	public InputNode(Double bias) {
-		super(0);
-		this.min = 0.0;
-		this.max = 0.0;
+	public InputNode(Double bias, String label) {
+		this(label);
 		this.setBias(bias);
+	}
+	
+	public String getInputLabel() {
+		return this.inputLabel;
+	}
+	
+	public void setInputLabel(String label) {
+		this.inputLabel = label;
+	}
+	
+	public void setMin(Double min) {
+		this.min = min;
+	}
+	
+	public void setMax(Double max) {
+		this.max = max;
 	}
 	
 	public Double getMin() {
@@ -110,14 +124,15 @@ public class InputNode extends Node{
 			newBias = newBias > 1 ? 1 : newBias;
 			newBias = newBias < -1 ? -1 : newBias;
 		}
-		return new InputNode(this.histCapasity, newBias);
+		String newLabel = this.getInputLabel();
+		return new InputNode(this.histCapasity, newBias, newLabel);
 	}
 	
 	@Override
 	public String toString() {
-		String str = "Weights ";
-		str += this.toStringRoundedWeights();
-		str += "\nOutput = " + this.output;
+		String str = "Label: " + this.getInputLabel();
+		str += "\r\nWeights " + this.toStringRoundedWeights();
+		str += "\r\nOutput = " + this.output;
 
 		return str;
 	}
