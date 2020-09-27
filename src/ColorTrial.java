@@ -17,21 +17,7 @@ public class ColorTrial extends Trial {
 		this.setInputMinMax(minmax);
 		this.setDir(this.getBaseDir() + "/ColorTrialResults");
 		this.setMorgueDir(this.getDir() + "/" + this.getWorkingFileName().substring(0, this.getWorkingFileName().length() - 4) + "_Morgue");
-		
-		
-		
 	}
-	
-//	public ColorTrial(int numNetworks, int numCycles, int[] netStructure, int numColors, int numHistoryInpu, int[] inputHistoryStrut) {
-//		super(numNetworks, numCycles, netStructure, new ArrayList<ArrayList<Double>>(), new String[] {}, numHistoryInpu, inputHistoryStrut);
-//		this.setTrialInputs(ColorTrial.makeSomeColors(numColors));
-//		this.expandInputs();
-//		this.setInputLegend(new String[] {"Red", "Green", "Blue"});
-//		this.setDir(this.getBaseDir() + "/ColorTrialResults");
-//		this.setMorgueDir(this.getDir() + "/" + this.getWorkingFileName().substring(0, this.getWorkingFileName().length() - 4) + "_Morgue");
-//		
-//	}
-
 	
 	public static ArrayList<ArrayList<Double>> makeSomeColors(int num){
 		ArrayList<ArrayList<Double>> arrayListOfColors = new ArrayList<ArrayList<Double>>();
@@ -42,7 +28,7 @@ public class ColorTrial extends Trial {
 	}
 	@Override
 	//This method takes in a network and it's outputs.  then evaluates those outputs against the answer and updates the network (score or state variables)
-	public void evaluateAndUpdate(Network net, ArrayList<Double> inputColor) {
+	public void evaluateAndUpdate(Network net, ArrayList<Double> inputColor, int setNum) {
 		OutputNode highestOutput = Network.findHighestOutputNode(net);
 		String NetworkOut = highestOutput.getOutputLabel();
 		
@@ -57,6 +43,11 @@ public class ColorTrial extends Trial {
 			net.incScore();
 		}
 		//System.out.println("Out: " + NetworkOut + "\nAns: " + answer + "\nInc? " + NetworkOut.equals(answer) + "\n-----");
+	}
+	
+	@Override
+	public void finalEvaluateAndScore(Network net, ArrayList<Double> SetInputs, int setNum) {
+		this.evaluateAndUpdate(net, SetInputs, setNum);
 	}
 	
 	public static String defineColor(ArrayList<Double> color) {
@@ -147,11 +138,6 @@ public class ColorTrial extends Trial {
 			return "Blue";
 		}
 		return "Fuck Again";
-	}
-	
-	@Override
-	public void finalEvaluateAndScore(Network net, ArrayList<Double> SetInputs) {
-		this.evaluateAndUpdate(net, SetInputs);
 	}
 
 	public static ArrayList<Double> randColor(){

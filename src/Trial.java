@@ -17,12 +17,13 @@ public abstract class Trial {
 	private int cycles, numNetworks, numDead, numHistoryInputs, firstGen;
 	private int[] netStructure, inputHistoryStructure;
 	private ArrayList<ArrayList<Double>> TrialInputs;
-	private boolean fillTheMorgue$;
+	private boolean fillTheMorgue$, structureMorph;
 	private String[][] IOLegend;
 	private long Start;
 	private String dir, morgueDir, workingFileName, FileName;
 	private Double evolveRate, learnRate;
 	private Double[][] inputMinMax;
+	private ArrayList<String> Answers;
 
 	//constructors
 	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[][] ioLegend){
@@ -40,14 +41,11 @@ public abstract class Trial {
 		this.workingFileName = Trial.dateAndTime() + "_Working.txt";
 		
 	}
-
-	public Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[][] ioLegend, int numHistoryInputs, int[] inputHistoryStrut){
-		this(numNetworks, numCycles, netStructure, trialInputs, ioLegend);
+	
+	public void SetUpHistoryInputs(int numHistoryInputs, int[] inputHistoryStrut) {
 		this.numHistoryInputs = numHistoryInputs;
 		this.inputHistoryStructure = inputHistoryStrut;
 		this.expandInputs();
-		this.networks = new ArrayList<Network>();
-		this.firstGen = 0;	
 	}
 
 	//Set = A set of inputs
@@ -73,31 +71,32 @@ public abstract class Trial {
 
 	public void runCycle() {
 		for (int setNum = 0; setNum < TrialInputs.size() - 1; setNum++) {
-			this.runSet(TrialInputs.get(setNum));			
+			this.runSet(TrialInputs.get(setNum), setNum);			
 		}
-		this.runFinalSet(TrialInputs.get(TrialInputs.size() - 1));
+		this.runFinalSet(TrialInputs.get(TrialInputs.size() - 1), TrialInputs.size() - 1);
 		this.compare();
 		this.cullAndCreate();
 	}
 
-	public void runSet(ArrayList<Double> inputs){
+	public void runSet(ArrayList<Double> inputs, int setNum){
 		// run a set of inputs
 		for (int i = 0; i < this.networks.size(); i++){
 			this.networks.get(i).resetOutputs();			
 			this.networks.get(i).run(inputs);
-			this.evaluateAndUpdate(networks.get(i), inputs);
+			this.evaluateAndUpdate(networks.get(i), inputs, setNum);
 		}
 	}
 
-	public void runFinalSet(ArrayList<Double> inputs){
+	public void runFinalSet(ArrayList<Double> inputs, int numSet){
 		for (int i = 0; i < this.networks.size(); i++){
 			this.networks.get(i).resetOutputs();			
 			this.networks.get(i).run(inputs);
-			this.finalEvaluateAndScore(networks.get(i), inputs);
+			this.finalEvaluateAndScore(networks.get(i), inputs, numSet);
 		}
 	}
 
 	public void createNetworks() {
+		this.checkTrialStructure();
 		if (this.numHistoryInputs <= 0) {
 			for (int i = 0; i < numNetworks; i++) {
 				this.networks.add(new Network(this.netStructure, this.firstGen, this.IOLegend));
@@ -109,6 +108,11 @@ public abstract class Trial {
 				this.firstGen++;
 			}
 		}
+	}
+	
+	public void checkTrialStructure() {
+		this.netStructure[0] = this.getTrialInputs().get(0).size();
+		this.netStructure[this.netStructure.length - 1] = this.getIOLegend()[1].length;
 	}
 
 	public void setEvolveRate(Double evolveRate) {
@@ -187,8 +191,16 @@ public abstract class Trial {
 		this.fillTheMorgue$ = fill$;
 	}
 
-	public boolean getMorgue() {
+	public boolean MorgueIsOpen() {
 		return this.fillTheMorgue$;
+	}
+	
+	public void setStructureMorph(boolean strutMorph) {
+		this.structureMorph = strutMorph;
+	}
+	
+	public boolean structureMorphIsOn() {
+		return this.structureMorph;
 	}
 
 	public int getNumNetworks() {
@@ -258,6 +270,14 @@ public abstract class Trial {
 	public ArrayList<Double> getInputSet(int i){
 		return this.TrialInputs.get(i);
 	} 
+	
+	public ArrayList<String> getAnswers(){
+		return this.Answers;
+	}
+	
+	public void setAnswers(ArrayList<String> answers){
+		this.Answers = answers;
+	}
 
 	public String stringTrialInputs() {
 		String str = "";
@@ -479,12 +499,24 @@ public abstract class Trial {
 
 	
 	//This method takes in a network and it's outputs.  then evaluates those outputs against the answer and updates the network
-	public abstract void evaluateAndUpdate(Network net, ArrayList<Double> SetOfInputs);
+	public void evaluateAndUpdate(Network net, ArrayList<Double> SetOfInputs, int setNum) {
+		ArrayList<Double> rawOutput = net.getNetworkOutput();
+		String output = this.getIOLegend()[1][0];
+		for (int i = 1; i < rawOutput.size(); i++) {
+			output = rawOutput.get(i) > rawOutput.get(i - 1) ? this.getIOLegend()[1][i] : output;
+		}
+		
+		if (output.equals(this.Answers.get(setNum))) {
+			net.incScore();
+		}		
+	}
 
 
 	//This method is the final evaluation.  If score updates after each set, then it can just put in evaluateAndUpdate().
 	//  else it can take the state variables and compute a score
-	public abstract void finalEvaluateAndScore(Network net, ArrayList<Double> SetOfInputs);
+	public void finalEvaluateAndScore(Network net, ArrayList<Double> SetOfInputs, int setNum) {
+		this.evaluateAndUpdate(net, SetOfInputs, setNum);
+	}
 
 	public String toSave(int currentCycle) {
 		String save = this.getClass() + ", Copy Saved: " + Trial.dateAndTime();
@@ -534,7 +566,7 @@ public abstract class Trial {
 
 	public String toStringMorgue() {
 		String str = "    Dead Networks: ";
-		if (this.getMorgue()) {
+		if (this.MorgueIsOpen()) {
 			str += "KEPT\r\n";
 		} else {
 			str += "DISCARDED\r\n";
