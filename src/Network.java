@@ -8,9 +8,10 @@ public class Network implements Comparable<Network>{
 	private ArrayList<Integer> heredity;
 	private int children;
 	private ArrayList<ArrayList<Double>> outputs;
-	private ArrayList<Double> networkOutput;
+	private ArrayList<Double> networkOutput, stateVar;
 	private int[] structure;
 	private String[][] IOLegend;
+	private ArrayList<String> stateVarLabel;
 
 	//constructors
 	public Network(int[] struct, int firstGen, String[][] ioLegend) {
@@ -286,6 +287,30 @@ public class Network implements Comparable<Network>{
 	
 	public void setIOLegend(String[][] legend) {
 		this.IOLegend = legend;
+	}
+	
+	public void setStateVar(ArrayList<Double> vars) {
+		this.stateVar = vars;
+	}
+	
+	public ArrayList<Double> getStateVar(){
+		return this.stateVar;
+	}
+	
+	public Double getStateVar(int index){
+		return this.stateVar.get(index);
+	}
+	
+	public void setStateVarLabel(ArrayList<String> labels) {
+		this.stateVarLabel = labels;
+	}
+	
+	public ArrayList<String> getStateVarLabel(){
+		return this.stateVarLabel;
+	}
+	
+	public String getStateVarLabel(int index){
+		return this.stateVarLabel.get(index);
 	}
 
 	public int[] getStructure() {
