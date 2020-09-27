@@ -629,6 +629,26 @@ public abstract class Trial {
 
 		return uniqueInputs;
 	}
+	
+	public static ArrayList<ArrayList<Double>> flipDoubleArrayList(ArrayList<ArrayList<Double>> Arr){
+		ArrayList<ArrayList<Double>> newArr = new ArrayList<ArrayList<Double>>();
+		for (int i = 1; i < Arr.size() - 1; i++) {
+			if (Arr.get(i).size() != Arr.get(i - 1).size() || Arr.get(i).size() != Arr.get(i + 1).size()) {
+				System.out.println("Error 212:  Cannot Flip Double ArrayList of varying sizes.");
+				return Arr;
+			}
+		}
+		for (int i = 0; i < Arr.get(0).size(); i++) {
+			ArrayList<Double> newStuff = new ArrayList<Double>();
+			for (int j = 0; j < Arr.size(); j++) {
+				newStuff.add(Arr.get(j).get(i));
+			}
+			newArr.add(newStuff);
+		}
+		
+		
+		return newArr;
+	}
 }
 
 
