@@ -1,26 +1,22 @@
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 public class testStuff {
 
 	public static void main(String[] args) {
-		ArrayList<ArrayList<Double>> Arr = new ArrayList<ArrayList<Double>>();
-		for (int i = 0; i < 10; i++) {
-			ArrayList<Double> newStuff = new ArrayList<Double>();
-			for (Double j = 0.0; j < 10; j++) {
-				newStuff.add(j);
-			}
-			Arr.add(newStuff);
-		}
+		double a = 0.3;
+		double b = 0.1;
+		double c = a - b;
 		
+		System.out.println(c);
 		
-		System.out.println(Arr.toString());
+		BigDecimal _a = new BigDecimal("0.03");
+		BigDecimal _b = new BigDecimal("0.01");
+		BigDecimal _c = _a.subtract(_b);
 		
-		
-		Arr = Trial.flipDoubleArrayList(Arr);
-		
-		System.out.println(Arr.toString());
+		System.out.println(_c);
 	}
 }
 

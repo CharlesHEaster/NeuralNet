@@ -1,3 +1,4 @@
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -8,7 +9,8 @@ public class Network implements Comparable<Network>{
 	private ArrayList<Integer> heredity;
 	private int children;
 	private ArrayList<ArrayList<Double>> outputs;
-	private ArrayList<Double> networkOutput, stateVar;
+	private ArrayList<Double> networkOutput;
+	private ArrayList<BigDecimal> stateVar;
 	private int[] structure;
 	private String[][] IOLegend;
 	private ArrayList<String> stateVarLabel;
@@ -289,15 +291,15 @@ public class Network implements Comparable<Network>{
 		this.IOLegend = legend;
 	}
 	
-	public void setStateVar(ArrayList<Double> vars) {
+	public void setStateVar(ArrayList<BigDecimal> vars) {
 		this.stateVar = vars;
 	}
 	
-	public ArrayList<Double> getStateVar(){
+	public ArrayList<BigDecimal> getStateVar(){
 		return this.stateVar;
 	}
 	
-	public Double getStateVar(int index){
+	public BigDecimal getStateVar(int index){
 		return this.stateVar.get(index);
 	}
 	
