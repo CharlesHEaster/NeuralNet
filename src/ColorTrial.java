@@ -145,11 +145,15 @@ public class ColorTrial extends Trial {
 		for (int i = 0; i < 3; i++) {
 			color.add(Math.floor(Math.random() * 256));
 		}
-		while (color.get(0) == color.get(1) || color.get(1) == color.get(2)) {
-			color.set(1,  Math.floor(Math.random() * 256));
-		}
-		while (color.get(1) == color.get(2) || color.get(2) == color.get(0)) {
-			color.set(2,  Math.floor(Math.random() * 256));
+		double rando = Math.random();
+		if (rando < 0.025) {
+			for (int i = 0; i < 3; i++) {
+				color.add(255.0);
+			}
+		} else if (rando < 0.05) {
+			for (int i = 0; i < 3; i++) {
+				color.add(0.0);
+			}
 		}
 		return color;
 	}

@@ -6,17 +6,14 @@ import java.util.ArrayList;
 public class testStuff {
 
 	public static void main(String[] args) {
-		double a = 0.3;
-		double b = 0.1;
-		double c = a - b;
+		int[] strut = new int[2];
+		strut[0] = 3;
+
+		strut[1] = 11;
+
+		ColorTrial C = new ColorTrial(200, 200, strut, 100);
 		
-		System.out.println(c);
-		
-		BigDecimal _a = new BigDecimal("0.03");
-		BigDecimal _b = new BigDecimal("0.01");
-		BigDecimal _c = _a.subtract(_b);
-		
-		System.out.println(_c);
+		C.run();
 	}
 }
 

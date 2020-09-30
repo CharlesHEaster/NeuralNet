@@ -112,7 +112,7 @@ public class Network implements Comparable<Network>{
 		return netStructure;
 	}
 
-	public ArrayList<Double> run(ArrayList<Double> inputs) {
+	public void run(ArrayList<Double> inputs) {
 		//1. Iterate through levels (columns) of nodes.
 		//2. Iterate through individual nodes (step down each column)
 		//3. if first column of nodes (hence input nodes), input only the corresponding input from "inputs"
@@ -128,7 +128,7 @@ public class Network implements Comparable<Network>{
 				if (n instanceof InputNode) {
 					InputNode nInput = (InputNode)n;
 					nInput.setInput(inputs.get(j));
-					nextOutput.add(n.calcOutput());
+					nextOutput.add(nInput.calcOutput());
 				} else {
 					n.setInputs(this.outputs.get(i - 1));
 					nextOutput.add(n.calcOutput());
@@ -137,7 +137,6 @@ public class Network implements Comparable<Network>{
 			this.outputs.add(nextOutput);
 		}
 		this.networkOutput = this.outputs.get(this.outputs.size() - 1);
-		return this.networkOutput;
 	}
 
 	public void resetOutputs() {
@@ -186,12 +185,15 @@ public class Network implements Comparable<Network>{
 	
 	public String toSave() {
 		String save = "Network{\r\n";
-		save += "  Heredity{" + this.heredity.toString() + "}\r\n";
+		save += "  Heredity: " + this.heredity.toString() + "\r\n";
 		save += "  Score: " + this.getScore() + "\r\n";
-		save += "  Nodes: ";
-		for (int j = 0; j < this.nodes.get(0).size(); j++) {
-			Node n = this.nodes.get(0).get(j);
-			save += " node{InputNode(HistCapasity: " + ((InputNode)n).getHistCapasity() + ")";
+		save += "  Nodes{\r\n";
+		for (int i = 0; i < this.nodes.get(0).size(); i++) {
+			Node n = this.nodes.get(0).get(i);
+			if (((InputNode)n).getHistCapasity() > 0) {
+				save += "   node{InputNode(HistCapasity: " + ((InputNode)n).getHistCapasity() + ")";
+			}
+			save += "   node{InputNode: ";
 			save += n.toSaveWeights();
 			save += "}\r\n";
 		}
@@ -200,7 +202,7 @@ public class Network implements Comparable<Network>{
 		for (int i = 1; i < this.nodes.size(); i++) {
 			for (int j = 0; j < this.nodes.get(i).size(); j++) {
 				Node n = this.nodes.get(i).get(j);
-				save += " node{";
+				save += "   node{";
 				save += n.toSaveWeights();
 				save += "}\r\n";
 				}

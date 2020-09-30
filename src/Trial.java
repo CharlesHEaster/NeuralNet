@@ -14,7 +14,7 @@ public abstract class Trial {
 
 
 	private ArrayList<Network> networks, theBest;
-	private int cycles, numNetworks, numDead, numHistoryInputs, firstGen;
+	private int cycles, currentCycle, numNetworks, numDead, numHistoryInputs, firstGen;
 	private int[] netStructure, inputHistoryStructure;
 	private ArrayList<ArrayList<Double>> TrialInputs;
 	private boolean fillTheMorgue$, structureMorph;
@@ -34,6 +34,7 @@ public abstract class Trial {
 		this.netStructure = netStructure;
 		this.theBest = new ArrayList<Network>();
 		this.cycles = numCycles;
+		this.currentCycle = 1;
 		this.fillTheMorgue$ = false;
 		this.evolveRate = 0.3;
 		this.learnRate = 0.2;
@@ -55,10 +56,10 @@ public abstract class Trial {
 		this.createNetworks();
 		this.passInputMinMax();
 		this.Start = System.nanoTime();
-		for(int i = 1; i <= this.cycles; i++) {
-			System.out.print("Cycle: " + i + "/" + this.cycles + " :: ");
+		for(; this.currentCycle <= this.cycles; this.currentCycle++) {
+			System.out.print("Cycle: " + this.currentCycle + "/" + this.cycles + " :: ");
 			this.runCycle();
-			String save = this.toSave(i);
+			String save = this.toSave();
 			Trial.writeNewFile(this.getDir(), this.getWorkingFileName(), save);
 		}
 		System.out.println("--Compiling and Publishing Results--");
@@ -518,12 +519,12 @@ public abstract class Trial {
 		this.evaluateAndUpdate(net, SetOfInputs, setNum);
 	}
 
-	public String toSave(int currentCycle) {
+	public String toSave() {
 		String save = this.getClass() + ", Copy Saved: " + Trial.dateAndTime();
 		save = save.substring(6);
 		save += "    Networks Trained for: " + Trial.convertNanoTime(this.getElapsed()) + "\r\n";
 		save += "   # of Networks : " + this.getNumNetworks() + "\r\n";
-		save += "          Cycles : " + currentCycle + "/" + this.getNumCycles() + "\r\n";
+		save += "          Cycles : " + this.currentCycle + "/" + this.getNumCycles() + "\r\n";
 		save += this.toStringMorgue();
 		save += "       Learn Rate: " + this.learnRate + "\r\n";
 		save += "      Evolve Rate: " + this.evolveRate + "\r\n";
@@ -531,10 +532,17 @@ public abstract class Trial {
 		save += "  FirstGen Networks Created: " + this.firstGen + "\r\n";
 		save += this.toStringInputs();
 		save += "BestNetworks{\r\n";
+		for (int i = 0; i < theBest.size(); i++) {
+			save += theBest.get(i).toSave(); 
+		}
+		save += "}/BestNetworks\r\n\r\n";
+		save += "The Rest of the Networks{\r\n";
 		for (int i = 0; i < networks.size(); i++) {
 			save += networks.get(i).toSave(); 
 		}
-		save += "}/BestNetworks";
+		save += "}/Networks\r\n\r\n";
+		
+		
 
 		return save;
 	}
@@ -583,8 +591,10 @@ public abstract class Trial {
 			}
 		inputString += "               Input Legend: ";
 		inputString += Arrays.toString(this.getInputLegend()) + "\r\n";
-		inputString += "Inputs\r\n";
-		inputString += this.stringTrialInputs() + "\r\n\r\n";
+		inputString += "              Output Legend: ";
+		inputString += Arrays.toString(this.getOutputLegend()) + "\r\n";
+		inputString += "Inputs{\r\n";
+		inputString += this.stringTrialInputs() + "}/Inputs\r\n\r\n";
 
 		return inputString;
 	}
