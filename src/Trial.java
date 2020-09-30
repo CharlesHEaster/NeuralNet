@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-public abstract class Trial {
+public class Trial {
 
 
 	private ArrayList<Network> networks, theBest;
@@ -393,7 +393,7 @@ public abstract class Trial {
 
 	public void compileTheMorgue() {
 		if (!this.fillTheMorgue$) {
-			System.out.println("Cannot compile the morgue because it is not on.");
+			System.out.println("No Morgue was created to compile.");
 		} else {
 			System.out.println("Compiling Morgue...");
 		}
@@ -412,6 +412,34 @@ public abstract class Trial {
 		} else {
 			System.out.println("Morgue Compile Failed");
 		}
+	}
+	
+	public static String load(String trialFile) {
+		String Full = Trial.readFile(trialFile);
+		String trialClass = Full.substring(0, Full.indexOf("Copy") - 2);
+		String trainedFor = Full.substring(Full.indexOf("for: ") + 5, Full.indexOf("   # of Networks") - 2);
+		String numNetworks = Full.substring(Full.indexOf("of Networks") + 14, Full.indexOf("Cycles")  - 12);
+		String currentCycle = Full.substring(Full.indexOf("Cycles :") + 9, Full.indexOf("/", Full.indexOf("Cycles :")));
+		String numCycles = Full.substring(Full.indexOf("/", Full.indexOf("Cycles")) + 1, Full.indexOf("Dead Networks") - 6);
+		String morgue = Full.substring(Full.indexOf("Dead Networks:") + 15, Full.indexOf("Dead Networks:") + 16);
+		Boolean morgue$ = morgue.equals("K");
+		String learnRate = Full.substring(Full.indexOf("Rate:") + 6, Full.indexOf("Evolve R") - 8);
+		String evolveRate = Full.substring(Full.indexOf("Evolve Rate:") + 13, Full.indexOf("Starting") - 3);
+		String netStructure = Full.substring(Full.indexOf("Structure") + 11, Full.indexOf("FirstGen") - 4);
+		String firstGen = Full.substring(Full.indexOf("Created") + 9, Full.indexOf("Input") - 17);
+		String inputLegend = Full.substring(Full.indexOf("Legend") + 8, Full.indexOf("Output") - 16);
+		String outputLegend = Full.substring(Full.indexOf("Output") + 15, Full.indexOf("Inputs{") - 2);
+		String inputs = Full.substring(Full.indexOf("Inputs{") + 9, Full.indexOf("BestNetworks{") - 4);
+		String theBest = Full.substring(Full.indexOf("BestNetworks{") + 13, Full.indexOf("}/BestNetworks"));
+		String theRest = Full.substring(Full.indexOf("The Rest of the Networks{") + 25, Full.indexOf("}/Networks"));
+		
+		//TODO parse the strings into ints and arrays and make a Network.load(String str) method
+
+		return firstGen;
+
+		
+		//Trial N = new Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[][] ioLegend);
+		
 	}
 	
 	public static String dateAndTime() {
@@ -600,11 +628,15 @@ public abstract class Trial {
 	}
 
 	public static String readFile(String directory, String fileName) {
+		return Trial.readFile(directory + "/" + fileName);
+	}
+	
+	public static String readFile(String fullPath) {
 		String file = "";
 		BufferedReader objReader = null;
 		try {
 			String strCurrentLine;
-			objReader = new BufferedReader(new FileReader(directory + "/" + fileName));
+			objReader = new BufferedReader(new FileReader(fullPath));
 
 			while ((strCurrentLine = objReader.readLine()) != null) {
 
@@ -627,6 +659,7 @@ public abstract class Trial {
 		return file;
 
 	}
+
 
 	public static ArrayList<Double> getUniqueInputs(ArrayList<Double> originalInputs){
 		ArrayList<Double> uniqueInputs = new ArrayList<Double>();
