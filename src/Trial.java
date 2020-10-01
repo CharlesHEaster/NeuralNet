@@ -39,7 +39,32 @@ public class Trial {
 		this.evolveRate = 0.3;
 		this.learnRate = 0.2;
 		this.firstGen = 0;
-		this.workingFileName = Trial.dateAndTime() + "_Working.txt";
+		this.workingFileName = 
+				//Trial.dateAndTime() + 
+				"_Working.txt";
+		
+	}
+	
+	public Trial(Integer numNetworks, Integer numCycles, Integer[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[][] ioLegend){
+		this.IOLegend = ioLegend;
+		this.TrialInputs = trialInputs;
+		this.networks = new ArrayList<Network>();
+		this.numNetworks = numNetworks;
+		int[] newNetStruct = new int[netStructure.length];
+		for (int i = 0; i < netStructure.length; i++) {
+			newNetStruct[i] = netStructure[i].intValue();
+		}
+		this.netStructure = newNetStruct;
+		this.theBest = new ArrayList<Network>();
+		this.cycles = numCycles;
+		this.currentCycle = 1;
+		this.fillTheMorgue$ = false;
+		this.evolveRate = 0.3;
+		this.learnRate = 0.2;
+		this.firstGen = 0;
+		this.workingFileName = 
+				//Trial.dateAndTime() + 
+				"_Working.txt";
 		
 	}
 	
@@ -414,32 +439,49 @@ public class Trial {
 		}
 	}
 	
-	public static String load(String trialFile) {
+	public static Trial load(String trialFile) {
 		String Full = Trial.readFile(trialFile);
-		String trialClass = Full.substring(0, Full.indexOf("Copy") - 2);
-		String trainedFor = Full.substring(Full.indexOf("for: ") + 5, Full.indexOf("   # of Networks") - 2);
-		String numNetworks = Full.substring(Full.indexOf("of Networks") + 14, Full.indexOf("Cycles")  - 12);
-		String currentCycle = Full.substring(Full.indexOf("Cycles :") + 9, Full.indexOf("/", Full.indexOf("Cycles :")));
-		String numCycles = Full.substring(Full.indexOf("/", Full.indexOf("Cycles")) + 1, Full.indexOf("Dead Networks") - 6);
-		String morgue = Full.substring(Full.indexOf("Dead Networks:") + 15, Full.indexOf("Dead Networks:") + 16);
-		Boolean morgue$ = morgue.equals("K");
-		String learnRate = Full.substring(Full.indexOf("Rate:") + 6, Full.indexOf("Evolve R") - 8);
-		String evolveRate = Full.substring(Full.indexOf("Evolve Rate:") + 13, Full.indexOf("Starting") - 3);
-		String netStructure = Full.substring(Full.indexOf("Structure") + 11, Full.indexOf("FirstGen") - 4);
-		String firstGen = Full.substring(Full.indexOf("Created") + 9, Full.indexOf("Input") - 17);
-		String inputLegend = Full.substring(Full.indexOf("Legend") + 8, Full.indexOf("Output") - 16);
-		String outputLegend = Full.substring(Full.indexOf("Output") + 15, Full.indexOf("Inputs{") - 2);
-		String inputs = Full.substring(Full.indexOf("Inputs{") + 9, Full.indexOf("BestNetworks{") - 4);
-		String theBest = Full.substring(Full.indexOf("BestNetworks{") + 13, Full.indexOf("}/BestNetworks"));
-		String theRest = Full.substring(Full.indexOf("The Rest of the Networks{") + 25, Full.indexOf("}/Networks"));
-		
-		//TODO parse the strings into ints and arrays and make a Network.load(String str) method
+		int[] target = new int[2];
+		target[0] = Full.indexOf(Trial.marker()) + Trial.marker().length();
+		target[1] = Full.indexOf(Trial.marker(), target[0]);
+		System.out.println(target[0] + " " + target[1]);
+		String trialClass = Full.substring(target[0], target[1]);
+		target = Trial.moveTarget(Full, target);
+		String trainedFor = Full.substring(target[0], target[1]);
+		target = Trial.moveTarget(Full, target);
+		Integer numNetworks = Integer.parseInt(Full.substring(target[0], target[1]));
+		target = Trial.moveTarget(Full, target);
+		Integer currentCycle = Integer.parseInt(Full.substring(target[0], target[1]));
+		target = Trial.moveTarget(Full, target);
+		Integer numCycles = Integer.parseInt(Full.substring(target[0], target[1]));
+		target = Trial.moveTarget(Full, target);
+		Boolean morgue$ = Full.substring(target[0], target[1]).equals("KEPT");
+		target = Trial.moveTarget(Full, target);
+		Integer learnRate = Integer.parseInt(Full.substring(target[0], target[1]));
+		target = Trial.moveTarget(Full, target);
+		Integer evolveRate = Integer.parseInt(Full.substring(target[0], target[1]));
+		target = Trial.moveTarget(Full, target);
+		Integer[] netStructure = Trial.convertToIntegerArray(Trial.unstringToInteger(Trial.unpackArrayList(Full.substring(target[0], target[1]))));
+		target = Trial.moveTarget(Full, target);
+		Integer firstGen = Integer.parseInt(Full.substring(target[0], target[1]));
+		target = Trial.moveTarget(Full, target);
+		String[] inputLegend = Trial.convertToStringArray(Trial.unpackArrayList(Full.substring(target[0], target[1])));
+		target = Trial.moveTarget(Full, target);
+		String[] outputLegend = Trial.convertToStringArray(Trial.unpackArrayList(Full.substring(target[0], target[1])));
+		String[][] IOLegend = new String[2][];
+		IOLegend[0] = inputLegend;
+		IOLegend[1] = outputLegend;
+		target = Trial.moveTarget(Full, target);
+		ArrayList<ArrayList<Double>> inputs = Trial.unstringArrayList2d(Full.substring(target[0], target[1]));
+		target = Trial.moveTarget(Full, target);
+		String theBest = Full.substring(target[0], target[1]);
+		target = Trial.moveTarget(Full, target);
+		String theRest = Full.substring(target[0], target[1]);
 
-		return firstGen;
+		Trial T = new Trial(numNetworks, numCycles, netStructure, inputs, IOLegend);
+		// TODO I got to the constructor.  Now I just need to plug in all the rest of those variables...  and unpack networks... ugh, I knew this would be tough
 
-		
-		//Trial N = new Trial(int numNetworks, int numCycles, int[] netStructure, ArrayList<ArrayList<Double>> trialInputs, String[][] ioLegend);
-		
+		return T;		
 	}
 	
 	public static String dateAndTime() {
@@ -548,30 +590,28 @@ public class Trial {
 	}
 
 	public String toSave() {
-		String save = this.getClass() + ", Copy Saved: " + Trial.dateAndTime();
-		save = save.substring(6);
-		save += "    Networks Trained for: " + Trial.convertNanoTime(this.getElapsed()) + "\r\n";
-		save += "   # of Networks : " + this.getNumNetworks() + "\r\n";
-		save += "          Cycles : " + this.currentCycle + "/" + this.getNumCycles() + "\r\n";
+		String save =  this.getClass() + Trial.marker() + ", Copy Saved: " + Trial.dateAndTime();
+		save = Trial.marker() + save.substring(6);
+		save += "    Networks Trained for: " + Trial.marker() + Trial.convertNanoTime(this.getElapsed()) + Trial.marker() + "\r\n";
+		save += "   # of Networks : " + Trial.marker() + this.getNumNetworks() + Trial.marker() + "\r\n";
+		save += "          Cycles : " + Trial.marker() + this.currentCycle + Trial.marker() + "/" + Trial.marker() + this.getNumCycles() + Trial.marker() + "\r\n";
 		save += this.toStringMorgue();
-		save += "       Learn Rate: " + this.learnRate + "\r\n";
-		save += "      Evolve Rate: " + this.evolveRate + "\r\n";
-		save += " Starting Network Structure: " + Arrays.toString(this.getStructure()) + "\r\n";
-		save += "  FirstGen Networks Created: " + this.firstGen + "\r\n";
+		save += "       Learn Rate: " + Trial.marker() + this.learnRate + Trial.marker() + "\r\n";
+		save += "      Evolve Rate: " + Trial.marker() + this.evolveRate + Trial.marker() + "\r\n";
+		save += " Starting Network Structure: " + Trial.marker() + Arrays.toString(this.getStructure()) + Trial.marker() + "\r\n";
+		save += "  FirstGen Networks Created: " + Trial.marker() + this.firstGen + Trial.marker() + "\r\n";
 		save += this.toStringInputs();
-		save += "BestNetworks{\r\n";
+		save += "BestNetworks{\r\n" + Trial.marker();
 		for (int i = 0; i < theBest.size(); i++) {
 			save += theBest.get(i).toSave(); 
 		}
-		save += "}/BestNetworks\r\n\r\n";
-		save += "The Rest of the Networks{\r\n";
+		save += Trial.marker() + "}/BestNetworks\r\n\r\n";
+		save += "The Rest of the Networks{\r\n" + Trial.marker();
 		for (int i = 0; i < networks.size(); i++) {
 			save += networks.get(i).toSave(); 
 		}
-		save += "}/Networks\r\n\r\n";
+		save += Trial.marker() + "}/Networks\r\n\r\n";
 		
-		
-
 		return save;
 	}
 	public void printTrialResults() {
@@ -601,12 +641,14 @@ public class Trial {
 	}
 
 	public String toStringMorgue() {
-		String str = "    Dead Networks: ";
+		String str = "    Dead Networks: " + Trial.marker();
 		if (this.MorgueIsOpen()) {
-			str += "KEPT\r\n";
+			str += Trial.marker() + "KEPT" + Trial.marker();
 		} else {
-			str += "DISCARDED\r\n";
+			str += "DISCARDED";
 		}
+		
+		str += Trial.marker() + "\r\n";
 
 		return str;		
 	}
@@ -614,15 +656,15 @@ public class Trial {
 	public String toStringInputs() {
 		String inputString = "";
 		if (this.numHistoryInputs > 0) {
-			inputString += "      Unique History Inputs: " + this.numHistoryInputs + "\r\n";
-			inputString += "InputNode History Structure: " + Arrays.toString(this.getInputHistoryStructure()) + "\r\n";
+			inputString += "      Unique History Inputs: " + Trial.marker() + this.numHistoryInputs + Trial.marker() + "\r\n";
+			inputString += "InputNode History Structure: " + Trial.marker() + Arrays.toString(this.getInputHistoryStructure()) + Trial.marker() + "\r\n";
 			}
 		inputString += "               Input Legend: ";
-		inputString += Arrays.toString(this.getInputLegend()) + "\r\n";
+		inputString += Trial.marker() + Arrays.toString(this.getInputLegend()) + Trial.marker() + "\r\n";
 		inputString += "              Output Legend: ";
-		inputString += Arrays.toString(this.getOutputLegend()) + "\r\n";
+		inputString += Trial.marker() + Arrays.toString(this.getOutputLegend()) + Trial.marker() + "\r\n";
 		inputString += "Inputs{\r\n";
-		inputString += this.stringTrialInputs() + "}/Inputs\r\n\r\n";
+		inputString += Trial.marker() + this.stringTrialInputs() + Trial.marker() + "}\r\n\r\n";
 
 		return inputString;
 	}
@@ -691,6 +733,147 @@ public class Trial {
 		
 		
 		return newArr;
+	}
+	
+	public static String marker() {
+		return "\u200e";
+	}
+	
+	public static int[] moveTarget(String bigString, int[] oldTarget) {
+		int[] newTarget = new int[2];
+		newTarget[0] = bigString.indexOf(Trial.marker(), oldTarget[1] + 1) + (Trial.marker().length());
+		newTarget[1] = bigString.indexOf(Trial.marker(), newTarget[0]);
+		
+		return newTarget;
+	}
+	
+	public static int[] nextSquares(String bigString, int[] oldTarget) {
+		int[] newTarget = new int[2];
+		newTarget[0] = bigString.indexOf("[", oldTarget[1]);
+		newTarget[1] = bigString.indexOf("]", newTarget[0]) + 1;
+		
+		return newTarget;
+	}
+	
+	public static int[] nextNumber(String bigString, int[] oldTarget) {
+		int[] newTarget = new int[2];
+		newTarget[0] = bigString.indexOf(",", oldTarget[1]) + 2;
+		newTarget[1] = bigString.indexOf(",", newTarget[0]);
+		
+		return newTarget;
+	}
+	
+	public static ArrayList<ArrayList<Double>> unstringArrayList2d(String str){
+		ArrayList<ArrayList<Double>> Arr = new ArrayList<ArrayList<Double>>();
+		ArrayList<ArrayList<String>> Str2dArr = new ArrayList<ArrayList<String>>();
+		ArrayList<String> bigStrArr = new ArrayList<String>();
+		int[] target = new int[2];
+		if (str.substring(0, 1).equals("[") && str.substring(1, 2).equals("[")) {
+			str = str.substring(1, str.length() - 1);
+		}
+		target[0] = str.indexOf("[");
+		target[1] = str.indexOf("]") + 1;
+		while (target[0] > -1) {
+			bigStrArr.add(str.substring(target[0], target[1]));
+			target = Trial.nextSquares(str, target);
+		}
+		for (int i = 0; i < bigStrArr.size(); i++) {
+			ArrayList<String> strArr = Trial.unpackArrayList(bigStrArr.get(i));
+			Str2dArr.add(strArr);
+		}
+		for (int i = 0; i < Str2dArr.size(); i++) {
+			ArrayList<Double> douArr = new ArrayList<Double>();
+			for (int j = 0; j < Str2dArr.get(i).size(); j++) {
+				Double d = Double.parseDouble(Str2dArr.get(i).get(j));
+				douArr.add(d);
+			}
+			Arr.add(douArr);
+		}
+
+		return Arr;
+	}
+	
+	public static ArrayList<String> unpackArrayList(String str){
+		ArrayList<String> strArr = new ArrayList<String>();
+		str = str.substring(1, str.length());
+		int[] target = new int[2];
+		target[0] = 0;
+		target[1] = str.indexOf(",");
+		while(target[1] > -1) {
+			strArr.add(str.substring(target[0], target[1]));
+			target = Trial.nextNumber(str, target);
+		}
+		strArr.add(str.substring(target[0], str.length() - 1));
+		
+		return strArr;		
+	}
+	
+	public static ArrayList<ArrayList<String>> unpack2dArrayList(String str){
+		ArrayList<ArrayList<String>> Str2dArr = new ArrayList<ArrayList<String>>();
+		ArrayList<String> bigStrArr = new ArrayList<String>();
+		int[] target = new int[2];
+		if (str.substring(0, 1).equals("[") && str.substring(1, 2).equals("[")) {
+			str = str.substring(1, str.length() - 1);
+		}
+		target[0] = str.indexOf("[");
+		target[1] = str.indexOf("]") + 1;
+		while (target[0] > -1) {
+			bigStrArr.add(str.substring(target[0], target[1]));
+			target = Trial.nextSquares(str, target);
+		}
+		for (int i = 0; i < bigStrArr.size(); i++) {
+			ArrayList<String> strArr = Trial.unpackArrayList(bigStrArr.get(i));
+			Str2dArr.add(strArr);
+		}	
+		return Str2dArr;
+	}
+	
+	public static ArrayList<Double> unstringToDouble(ArrayList<String> strArr){
+		ArrayList<Double> douArr = new ArrayList<Double>();
+		for (int i = 0; i < strArr.size(); i++) {
+			douArr.add(Double.parseDouble(strArr.get(i)));
+		}
+		return douArr;
+	}
+	
+	public static ArrayList<ArrayList<Double>> unstring2dToDouble(ArrayList<ArrayList<String>> strArr){
+		ArrayList<ArrayList<Double>> douArr = new ArrayList<ArrayList<Double>>();
+		for (int i = 0; i < strArr.size(); i++) {
+			douArr.add(Trial.unstringToDouble(strArr.get(i)));
+		}
+		return douArr;
+	}
+	
+	public static ArrayList<Integer> unstringToInteger(ArrayList<String> strArr){
+		ArrayList<Integer> intArr = new ArrayList<Integer>();
+		for (int i = 0; i < strArr.size(); i++) {
+			intArr.add(Integer.parseInt(strArr.get(i)));
+		}
+		return intArr;
+	}
+	
+	public static String[] convertToStringArray(ArrayList<String> arrL) {
+		String[] str = new String[arrL.size()];
+		for(int i = 0; i < arrL.size(); i++) {
+			str[i] = arrL.get(i);
+		}
+		return str;
+	}
+	
+	public static Double[] convertToDoubleArray(ArrayList<Double> arrL) {
+		Double[] str = new Double[arrL.size()];
+		for(int i = 0; i < arrL.size(); i++) {
+			str[i] = arrL.get(i);
+		}
+		return str;
+	}
+	
+	public static Integer[] convertToIntegerArray(ArrayList<Integer> arrL) {
+		Integer[] str = new Integer[arrL.size()];
+		for(int i = 0; i < arrL.size(); i++) {
+			str[i] = arrL.get(i);
+		}
+		return str;
 	}
 }
 
