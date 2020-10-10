@@ -67,7 +67,7 @@ public class Trial {
 				"_Working.txt";
 		
 	}
-	
+
 	public void SetUpHistoryInputs(int numHistoryInputs, int[] inputHistoryStrut) {
 		this.numHistoryInputs = numHistoryInputs;
 		this.inputHistoryStructure = inputHistoryStrut;
@@ -327,7 +327,22 @@ public class Trial {
 
 	public Network getNetwork(int i) {
 		return this.networks.get(i);
-	}										
+	}
+	private void setNetworks(ArrayList<Network> theRest) {
+		this.networks = theRest;
+	}
+
+	private void setTheBest(ArrayList<Network> theBest) {
+		this.theBest = theBest;
+	}
+
+	private void setFirstGen(Integer firstGen) {
+		this.firstGen = firstGen;	
+	}
+
+	private void setCurrentCycle(Integer currentCycle) {
+		this.currentCycle = currentCycle;
+	}
 
 	public void expandInputs() {
 		ArrayList<ArrayList<Double>> trialInputs = new ArrayList<ArrayList<Double>>(this.TrialInputs);
@@ -444,10 +459,10 @@ public class Trial {
 		int[] target = new int[2];
 		target[0] = Full.indexOf(Trial.marker()) + Trial.marker().length();
 		target[1] = Full.indexOf(Trial.marker(), target[0]);
-		System.out.println(target[0] + " " + target[1]);
 		String trialClass = Full.substring(target[0], target[1]);
 		target = Trial.moveTarget(Full, target);
 		String trainedFor = Full.substring(target[0], target[1]);
+		//TODO make setTrainedFor() to pass it on.
 		target = Trial.moveTarget(Full, target);
 		Integer numNetworks = Integer.parseInt(Full.substring(target[0], target[1]));
 		target = Trial.moveTarget(Full, target);
@@ -457,9 +472,9 @@ public class Trial {
 		target = Trial.moveTarget(Full, target);
 		Boolean morgue$ = Full.substring(target[0], target[1]).equals("KEPT");
 		target = Trial.moveTarget(Full, target);
-		Integer learnRate = Integer.parseInt(Full.substring(target[0], target[1]));
+		Double learnRate = Double.parseDouble(Full.substring(target[0], target[1]));
 		target = Trial.moveTarget(Full, target);
-		Integer evolveRate = Integer.parseInt(Full.substring(target[0], target[1]));
+		Double evolveRate = Double.parseDouble(Full.substring(target[0], target[1]));
 		target = Trial.moveTarget(Full, target);
 		Integer[] netStructure = Trial.convertToIntegerArray(Trial.unstringToInteger(Trial.unpackArrayList(Full.substring(target[0], target[1]))));
 		target = Trial.moveTarget(Full, target);
@@ -474,16 +489,31 @@ public class Trial {
 		target = Trial.moveTarget(Full, target);
 		ArrayList<ArrayList<Double>> inputs = Trial.unstringArrayList2d(Full.substring(target[0], target[1]));
 		target = Trial.moveTarget(Full, target);
-		String theBest = Full.substring(target[0], target[1]);
+		String strTheBest = Full.substring(target[0], target[1]);
 		target = Trial.moveTarget(Full, target);
-		String theRest = Full.substring(target[0], target[1]);
-
+		ArrayList<Network> theBest = Trial.extractNetworks(strTheBest);
+		String strTheRest = Full.substring(target[0], target[1]);
+		ArrayList<Network> theRest = Trial.extractNetworks(strTheRest);
+			
 		Trial T = new Trial(numNetworks, numCycles, netStructure, inputs, IOLegend);
-		// TODO I got to the constructor.  Now I just need to plug in all the rest of those variables...  and unpack networks... ugh, I knew this would be tough
+		
+		T.setCurrentCycle(currentCycle);
+		T.setMorgue(morgue$);
+		T.setLearnRate(learnRate);
+		T.setEvolveRate(evolveRate);
+		T.setFirstGen(firstGen);
+		for (Network N : theBest) {
+			N.setIOLegend(IOLegend);
+		}
+		for (Network N : theRest) {
+			N.setIOLegend(IOLegend);
+		}
+		T.setTheBest(theBest);
+		T.setNetworks(theRest);
 
 		return T;		
 	}
-	
+
 	public static String dateAndTime() {
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd--HH-mm-ss");  
 		LocalDateTime now = LocalDateTime.now();  
@@ -875,6 +905,37 @@ public class Trial {
 		}
 		return str;
 	}
+	
+	public static <T> void fromArrayToArrayList(T[] a, ArrayList<T> c) {
+		for (T o : a) {
+			c.add(o);
+		}
+		
+	}
+	
+	public static <T> void fromArrayListToArray(ArrayList<T> c, T[] a) {
+		for (int i = 0; i < c.size(); i++) {
+			a[i] = c.get(i);
+		}
+		
+	}
+	
+	public static ArrayList<Network> extractNetworks(String bigStr){
+		ArrayList<Network> Networks = new ArrayList<Network>();
+		Integer[] target = new Integer[2];
+		target[0] = bigStr.indexOf("‎Network{");
+		target[1] = bigStr.indexOf("}/Network");
+		while (target[0] >= 0 && target[1] >= 0) {
+			String network = bigStr.substring(target[0], target[1]);
+			Networks.add(Network.load(network));
+			target[0] = bigStr.indexOf("‎Network{", target[1]);
+			target[1] = bigStr.indexOf("}/Network", target[1]);
+		}
+		
+		
+		return Networks;
+	}
+	
 }
 
 

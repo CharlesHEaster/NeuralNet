@@ -150,6 +150,15 @@ public class Node {
 		return weights;
 	}
 
+	public static Node load(String bigStr) {
+		//TODO make it real.
+		Double[] weights = new Double[4];
+		Node N = new Node(weights);
+		
+		
+		
+		return N;
+	}
 
 }
 

@@ -183,18 +183,27 @@ public class Network implements Comparable<Network>{
 		return str;	
 	}
 	
+	public static Integer[] moveTarget(String bigStr, Integer[] oldTarget) {
+		Integer[] newTarget = new Integer[2];
+		newTarget[0] = bigStr.indexOf(Network.marker(), oldTarget[1]);
+		newTarget[1] = bigStr.indexOf(Network.marker(), newTarget[0]);
+		return newTarget;
+	}
+	
 	public String toSave() {
 		String save = "Network{\r\n";
-		save += "  Heredity: " + this.heredity.toString() + "\r\n";
-		save += "  Score: " + this.getScore() + "\r\n";
+		save += "  Heredity: " + Network.marker() + this.heredity.toString() + Network.marker() + "\r\n";
+		save += "  Score: " + Network.marker() + this.getScore() + Network.marker() + "\r\n";
+		save += "  Structure: " + Network.marker() + this.getStructure().toString() + Network.marker() + "\r\n";
 		save += "  Nodes{\r\n";
 		for (int i = 0; i < this.nodes.get(0).size(); i++) {
 			Node n = this.nodes.get(0).get(i);
 			if (((InputNode)n).getHistCapasity() > 0) {
-				save += "   node{InputNode(HistCapasity: " + ((InputNode)n).getHistCapasity() + ")";
+				save += "   node{" + Network.marker() + "InputNode(HistCapasity: " + ((InputNode)n).getHistCapasity() + ")";
+			} else {
+			save += "   node{" + Network.marker() + "InputNode: ";
 			}
-			save += "   node{InputNode: ";
-			save += n.toSaveWeights();
+			save += n.toSaveWeights() + Network.marker();
 			save += "}\r\n";
 		}
 
@@ -202,8 +211,8 @@ public class Network implements Comparable<Network>{
 		for (int i = 1; i < this.nodes.size(); i++) {
 			for (int j = 0; j < this.nodes.get(i).size(); j++) {
 				Node n = this.nodes.get(i).get(j);
-				save += "   node{";
-				save += n.toSaveWeights();
+				save += "   node{" + Network.marker();
+				save += n.toSaveWeights() + Network.marker();
 				save += "}\r\n";
 				}
 
@@ -211,6 +220,41 @@ public class Network implements Comparable<Network>{
 		save += "}/Nodes}/Network\r\n";
 		
 		return save;
+	}
+	
+	public static Network load(String bigStr) {
+		String Full = bigStr;
+		Integer[] target = new Integer[2];
+		target[0] = Full.indexOf(Network.marker()) + Network.marker().length();
+		target[1] = Full.indexOf(Network.marker(), target[0]);
+		String strHeredity = Full.substring(target[0], target[1]);
+		ArrayList<Integer> heredity = Trial.unstringToInteger(Trial.unpackArrayList(strHeredity));
+		target = Network.moveTarget(Full, target);
+		String strScore = Full.substring(target[0], target[1]);
+		target = Network.moveTarget(Full, target);
+		String strStructure =  Full.substring(target[0], target[1]);
+		Integer[] structure = Trial.convertToIntegerArray(Trial.unstringToInteger(Trial.unpackArrayList(strStructure)));
+		target = Network.moveTarget(Full, target);
+		ArrayList<String> strNodes = new ArrayList<String>();
+		ArrayList<Node> flatNodes = new ArrayList<Node>();
+		while (target[0] > 0 && target [1] > 0) {
+			Node N = Node.load(Full.substring(target[0], target[1]));
+			flatNodes.add(N);
+			target = Network.moveTarget(Full, target);
+		}
+		ArrayList<ArrayList<Node>> nodes = new ArrayList<ArrayList<Node>>();
+		int n = 0;
+		for (int i = 0; i < structure.length; i++) {
+			ArrayList<Node> layer = new ArrayList<Node>();
+			for (int j = 0; j < structure[i]; j++) {
+				layer.add(flatNodes.get(n));
+				n++;
+			}
+			nodes.add(layer);
+		}
+		
+		Network N = new Network(nodes, heredity);
+		return N;
 	}
 	
 	public static OutputNode findHighestOutputNode(Network N) {
@@ -285,6 +329,10 @@ public class Network implements Comparable<Network>{
 		return this.nodes.get(i);
 	}
 	
+	public static String marker() {
+		return "\u200f";
+	}
+	
 	public String[][] getIOLegend(){
 		return this.IOLegend;
 	}
@@ -349,7 +397,9 @@ public class Network implements Comparable<Network>{
 		newHered.addAll(this.heredity); 
 		newHered.add(this.children);
 		this.children++;
-		return new Network(newNodes, newHered);
+		Network N = new Network(newNodes, newHered);
+		N.setIOLegend(this.getIOLegend());
+		return N;
 	}
 
 
