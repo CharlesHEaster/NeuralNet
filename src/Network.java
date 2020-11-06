@@ -235,7 +235,6 @@ public class Network implements Comparable<Network>{
 		String strStructure =  Full.substring(target[0], target[1]);
 		Integer[] structure = Trial.convertToIntegerArray(Trial.unstringToInteger(Trial.unpackArrayList(strStructure)));
 		target = Network.moveTarget(Full, target);
-		ArrayList<String> strNodes = new ArrayList<String>();
 		ArrayList<Node> flatNodes = new ArrayList<Node>();
 		while (target[0] > 0 && target [1] > 0) {
 			Node N = Node.load(Full.substring(target[0], target[1]));
@@ -254,6 +253,8 @@ public class Network implements Comparable<Network>{
 		}
 		
 		Network N = new Network(nodes, heredity);
+		N.setScore(Double.parseDouble(strScore));
+		
 		return N;
 	}
 	
@@ -300,6 +301,10 @@ public class Network implements Comparable<Network>{
 
 	public Double getScore() {
 		return this.score;
+	}
+	
+	public void setScore(Double score) {
+		this.score = score;
 	}
 
 	public Node getNode(int col, int colnum) {

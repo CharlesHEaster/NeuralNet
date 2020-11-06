@@ -6,13 +6,9 @@ import java.util.ArrayList;
 public class testStuff {
 
 	public static void main(String[] args) {
-		int[] strut = new int[2];
-		strut[0] = 3;
-
-		strut[1] = 11;
-
-		ColorTrial C = new ColorTrial(200, 200, strut, 100);
-		C.run();
+		String str = "node{Weights [0.6566697751216966, -0.12559634343861809, -0.18144955666785506]}";
+		Node N = Node.load(str);
+		System.out.println(N.toString());
 		
 
 
