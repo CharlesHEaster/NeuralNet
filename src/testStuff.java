@@ -6,9 +6,23 @@ import java.util.ArrayList;
 public class testStuff {
 
 	public static void main(String[] args) {
-		String str = "node{Weights [0.6566697751216966, -0.12559634343861809, -0.18144955666785506]}";
-		Node N = Node.load(str);
-		System.out.println(N.toString());
+		
+		int[] strut = {3,5,3};
+		int firstGen = 11;
+		String[][] ioLegend = {{"Stuff", "And", "other"},{"Stuff", "And", "other"}};
+		Network N = new Network(strut, firstGen, ioLegend);
+		String Nsave = N.toSave();
+		System.out.println(Nsave);
+		System.out.println("-------------------------------------------------------------");
+		
+		String[] strArr = Nsave.split(Network.marker());
+		for (String a : strArr) {
+			a = a.replace("\r\n",  "");
+			System.out.println(a);
+		}
+		
+		
+		
 		
 
 

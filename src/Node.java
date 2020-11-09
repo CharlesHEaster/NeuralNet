@@ -151,40 +151,16 @@ public class Node {
 	}
 
 	public static Node load(String bigStr) {
-		bigStr = bigStr.replaceAll("\\s","");
-		Integer[] target = new Integer[2];
-		target[0] = bigStr.indexOf("[", 0) + 1;
-		target[1] = bigStr.indexOf(",", target[0]);
-		ArrayList<Double> weightsAL = new ArrayList<Double>();
-		while (target[0] > 0 && target [1] > 0) {
-			System.out.println(target[0] + " " + target[1]);
-			String W = bigStr.substring(target[0], target[1]);
-			W = W.replaceAll(",","");
-			weightsAL.add(Double.parseDouble(W));
-			System.out.println(Double.parseDouble(W));
-			target = Node.moveTarget(bigStr, target);
-		}
-		target[1] = bigStr.indexOf("]");
-		String W = bigStr.substring(target[0], target[1]);
-		W = W.replaceAll(",","");
-		weightsAL.add(Double.parseDouble(W));
-				
-		Double[] weights = new Double[weightsAL.size()]; // figure out the number
-		for (int i = 0; i < weightsAL.size(); i++) {
-			weights[i] = weightsAL.get(i);
+		bigStr = bigStr.replaceAll("[^0-9\\-\\.\\,]",  "");
+		String[] strArr = bigStr.split(",");
+		Double[] theseWeights = new Double[strArr.length];
+		for (int i = 0; i < strArr.length; i++) {
+			theseWeights[i] = Double.parseDouble(strArr[i]);
 		}
 				
-		Node N = new Node(weights);
+		Node N = new Node(theseWeights);
 		
 		return N;
-	}
-	
-	public static Integer[] moveTarget(String bigStr, Integer[] oldTarget) {
-		Integer[] newTarget = new Integer[2];
-		newTarget[0] = oldTarget[1];
-		newTarget[1] = bigStr.indexOf(",", newTarget[0] + 1);
-		newTarget[1] = newTarget[1];
-		return newTarget;
 	}
 
 }
