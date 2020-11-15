@@ -19,7 +19,7 @@ public class Trial {
 	private ArrayList<ArrayList<Double>> TrialInputs;
 	private boolean fillTheMorgue$, structureMorph;
 	private String[][] IOLegend;
-	private long Start;
+	private Long Start, trainedFor = 0L;
 	private String dir, morgueDir, workingFileName, FileName;
 	private Double evolveRate, learnRate;
 	private Double[][] inputMinMax;
@@ -39,9 +39,7 @@ public class Trial {
 		this.evolveRate = 0.3;
 		this.learnRate = 0.2;
 		this.firstGen = 0;
-		this.workingFileName = 
-				//Trial.dateAndTime() + 
-				"_Working.txt";
+		this.workingFileName = Trial.dateAndTime() + "_Working.txt";
 		
 	}
 	
@@ -289,8 +287,12 @@ public class Trial {
 		return this.theBest.get(i);
 	}
 
-	public long getElapsed() {
-		return  System.nanoTime() - this.Start;
+	public Long getElapsed() {
+		return  trainedFor + (System.nanoTime() - this.Start);
+	}
+	
+	public void setTrainedFor(Long l) {
+		this.trainedFor = l;
 	}
 
 	public ArrayList<Double> getInputSet(int i){
@@ -328,19 +330,19 @@ public class Trial {
 	public Network getNetwork(int i) {
 		return this.networks.get(i);
 	}
-	private void setNetworks(ArrayList<Network> theRest) {
+	protected void setNetworks(ArrayList<Network> theRest) {
 		this.networks = theRest;
 	}
 
-	private void setTheBest(ArrayList<Network> theBest) {
+	protected void setTheBest(ArrayList<Network> theBest) {
 		this.theBest = theBest;
 	}
 
-	private void setFirstGen(Integer firstGen) {
+	protected void setFirstGen(Integer firstGen) {
 		this.firstGen = firstGen;	
 	}
 
-	private void setCurrentCycle(Integer currentCycle) {
+	protected void setCurrentCycle(Integer currentCycle) {
 		this.currentCycle = currentCycle;
 	}
 
@@ -461,8 +463,7 @@ public class Trial {
 		target[1] = Full.indexOf(Trial.marker(), target[0]);
 		String trialClass = Full.substring(target[0], target[1]);
 		target = Trial.moveTarget(Full, target);
-		String trainedFor = Full.substring(target[0], target[1]);
-		//TODO make setTrainedFor() to pass it on.
+		Long trainedFor = Long.parseLong(Full.substring(target[0], target[1]));
 		target = Trial.moveTarget(Full, target);
 		Integer numNetworks = Integer.parseInt(Full.substring(target[0], target[1]));
 		target = Trial.moveTarget(Full, target);
@@ -510,6 +511,7 @@ public class Trial {
 		}
 		T.setTheBest(theBest);
 		T.setNetworks(theRest);
+		T.setTrainedFor(trainedFor);
 
 		return T;		
 	}
@@ -521,7 +523,7 @@ public class Trial {
 		return dtf.format(now);
 	}
 
-	public static String convertNanoTime(long time) {
+	public static String convertNanoTime(Long time) {
 		String str = "";
 		int minutes = 0, hours = 0, days = 0;
 		int seconds = (int) (time / 1000000000);
@@ -622,7 +624,7 @@ public class Trial {
 	public String toSave() {
 		String save =  this.getClass() + Trial.marker() + ", Copy Saved: " + Trial.dateAndTime();
 		save = Trial.marker() + save.substring(6);
-		save += "    Networks Trained for: " + Trial.marker() + Trial.convertNanoTime(this.getElapsed()) + Trial.marker() + "\r\n";
+		save += "    Networks Trained for: " + Trial.marker() + this.getElapsed() + Trial.marker() + "\r\n";
 		save += "   # of Networks : " + Trial.marker() + this.getNumNetworks() + Trial.marker() + "\r\n";
 		save += "          Cycles : " + Trial.marker() + this.currentCycle + Trial.marker() + "/" + Trial.marker() + this.getNumCycles() + Trial.marker() + "\r\n";
 		save += this.toStringMorgue();

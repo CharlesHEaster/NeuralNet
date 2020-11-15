@@ -158,5 +158,71 @@ public class ColorTrial extends Trial {
 		return color;
 	}
 	
+	public static ColorTrial load(String trialFile) {
+		String Full = Trial.readFile(trialFile);
+		String[] values = Full.split(Trial.marker());
+		int i = 1;
+		String trialClass = values[i]; 
+		System.out.println(values[i]);
+		i = i + 2;
+		System.out.println(values[i]);
+		Long trainedFor = Long.parseLong(values[i]);
+		i = i + 2;
+		Integer numNetworks = Integer.parseInt(values[i]);
+		i = i + 2;
+		Integer currentCycle = Integer.parseInt(values[i]);
+		i = i + 2;
+		Integer numCycles = Integer.parseInt(values[i]);
+		i = i + 2;
+		Boolean morgue$ = values[i].equals("KEPT");
+		i = i + 2;
+		Double learnRate = Double.parseDouble(values[i]);
+		i = i + 2;
+		Double evolveRate = Double.parseDouble(values[i]);
+		i = i + 2;
+		Integer[] strut = Trial.convertToIntegerArray(Trial.unstringToInteger(Trial.unpackArrayList(values[i])));
+		int[] netStructure = new int[strut.length];
+		for (int j = 0; j < strut.length; j++) {
+			netStructure[j] = strut[j].intValue();
+		}
+		i = i + 2;
+		Integer firstGen = Integer.parseInt(values[i]);		 
+		i = i + 2;
+		String[] inputLegend = Trial.convertToStringArray(Trial.unpackArrayList(values[i]));
+		i = i + 2;
+		String[] outputLegend = Trial.convertToStringArray(Trial.unpackArrayList(values[i]));
+		i = i + 2;
+		String[][] IOLegend = new String[2][];
+		IOLegend[0] = inputLegend;
+		IOLegend[1] = outputLegend;		 
+		ArrayList<ArrayList<Double>> inputs = Trial.unstringArrayList2d(values[i]);
+		int numColors = inputs.size();
+		i = i + 2;
+		String strTheBest = values[i];
+		i = i + 2;
+		ArrayList<Network> theBest = Trial.extractNetworks(strTheBest);
+		String strTheRest = values[i];
+		ArrayList<Network> theRest = Trial.extractNetworks(strTheRest);
+		
+		ColorTrial CT = new ColorTrial(numNetworks, numCycles, netStructure, numColors);
+		CT.setCurrentCycle(currentCycle);
+		CT.setMorgue(morgue$);
+		CT.setLearnRate(learnRate);
+		CT.setEvolveRate(evolveRate);
+		CT.setFirstGen(firstGen);
+		for (Network N : theBest) {
+			N.setIOLegend(IOLegend);
+		}
+		for (Network N : theRest) {
+			N.setIOLegend(IOLegend);
+		}
+		CT.setTheBest(theBest);
+		CT.setNetworks(theRest);
+		CT.setTrainedFor(trainedFor);
+		CT.setTrialInputs(inputs);
+		
+		return CT;
+	}
+	
 
 }
